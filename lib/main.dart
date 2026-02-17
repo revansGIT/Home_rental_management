@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:home_rental_management/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'utils/app_provider.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/property_list_screen.dart';
