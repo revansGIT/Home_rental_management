@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:home_rental_management/l10n/app_localizations.dart';
+import 'package:home_rental_management/core/localization/app_localizations.dart';
 
 import 'package:provider/provider.dart';
-import '../utils/app_provider.dart';
+import '../../../../utils/app_provider.dart';
 
 class PropertyDetailsScreen extends StatelessWidget {
   final String propertyId;
@@ -96,7 +96,9 @@ class PropertyDetailsScreen extends StatelessWidget {
                   unitNumber: '${index + 1}A',
                   tenant: index % 3 == 0 ? null : 'Tenant ${index + 1}',
                   rent: appProvider.formatCurrency(15000 + index * 1000),
-                  status: index % 3 == 0 ? localizations.vacant : localizations.occupied,
+                  status: index % 3 == 0
+                      ? localizations.vacant
+                      : localizations.occupied,
                   onTap: () {
                     if (index % 3 != 0) {
                       onViewTenant('tenant_$index');
@@ -205,7 +207,8 @@ class _UnitCard extends StatelessWidget {
                   children: [
                     Text(
                       'Unit $unitNumber',
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 4),
                     Text(

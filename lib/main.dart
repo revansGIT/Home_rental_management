@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:home_rental_management/l10n/app_localizations.dart';
+import 'package:home_rental_management/core/localization/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'utils/app_provider.dart';
-import 'screens/dashboard_screen.dart';
-import 'screens/property_list_screen.dart';
-import 'screens/property_details_screen.dart';
-import 'screens/tenant_profile_screen.dart';
-import 'screens/financial_reports_screen.dart';
+import 'features/dashboard/presentation/screens/dashboard_screen.dart';
+import 'features/properties/presentation/screens/property_list_screen.dart';
+import 'features/properties/presentation/screens/property_details_screen.dart';
+import 'features/tenants/presentation/screens/tenant_profile_screen.dart';
+import 'features/finance/presentation/screens/financial_reports_screen.dart';
 import 'screens/settings_screen.dart';
 
 void main() {

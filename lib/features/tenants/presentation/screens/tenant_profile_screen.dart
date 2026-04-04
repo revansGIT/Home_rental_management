@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:home_rental_management/l10n/app_localizations.dart';
+import 'package:home_rental_management/core/localization/app_localizations.dart';
 
 import 'package:provider/provider.dart';
-import '../utils/app_provider.dart';
+import '../../../../utils/app_provider.dart';
 
 class TenantProfileScreen extends StatelessWidget {
   final String tenantId;
@@ -57,7 +57,8 @@ class TenantProfileScreen extends StatelessWidget {
                   CircleAvatar(
                     radius: 40,
                     backgroundColor: Colors.blue[100],
-                    child: Icon(Icons.person, size: 40, color: Colors.blue[700]),
+                    child:
+                        Icon(Icons.person, size: 40, color: Colors.blue[700]),
                   ),
                   const SizedBox(width: 16),
                   const Expanded(
@@ -66,7 +67,8 @@ class TenantProfileScreen extends StatelessWidget {
                       children: [
                         Text(
                           'John Doe',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                         SizedBox(height: 4),
                         Text(
@@ -107,8 +109,10 @@ class TenantProfileScreen extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  _InfoRow(label: localizations.leaseStart, value: 'Jan 1, 2024'),
-                  _InfoRow(label: localizations.leaseEnd, value: 'Dec 31, 2024'),
+                  _InfoRow(
+                      label: localizations.leaseStart, value: 'Jan 1, 2024'),
+                  _InfoRow(
+                      label: localizations.leaseEnd, value: 'Dec 31, 2024'),
                   _InfoRow(
                     label: localizations.monthlyRent,
                     value: appProvider.formatCurrency(15000),
@@ -254,7 +258,8 @@ class _StatCard extends StatelessWidget {
         children: [
           Text(
             value,
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color),
+            style: TextStyle(
+                fontSize: 20, fontWeight: FontWeight.bold, color: color),
           ),
           const SizedBox(height: 4),
           Text(

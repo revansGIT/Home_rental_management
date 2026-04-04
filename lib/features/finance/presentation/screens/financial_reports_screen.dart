@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:home_rental_management/l10n/app_localizations.dart';
+import 'package:home_rental_management/core/localization/app_localizations.dart';
 import 'package:provider/provider.dart';
-import '../utils/app_provider.dart';
+import '../../../../utils/app_provider.dart';
 
 class FinancialReportsScreen extends StatelessWidget {
   const FinancialReportsScreen({super.key});
@@ -240,7 +240,8 @@ class _SummaryCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             value,
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color),
+            style: TextStyle(
+                fontSize: 20, fontWeight: FontWeight.bold, color: color),
           ),
           if (subtitle != null) ...[
             const SizedBox(height: 4),

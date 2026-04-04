@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:home_rental_management/l10n/app_localizations.dart';
+import 'package:home_rental_management/core/localization/app_localizations.dart';
 import 'package:provider/provider.dart';
-import '../utils/app_provider.dart';
+import '../../../../utils/app_provider.dart';
 
 class DashboardScreen extends StatelessWidget {
   final Function(String) onNavigateToProperty;
@@ -158,7 +158,8 @@ class DashboardScreen extends StatelessWidget {
                         children: [
                           Text(
                             localizations.collected,
-                            style: const TextStyle(fontSize: 12, color: Colors.grey),
+                            style: const TextStyle(
+                                fontSize: 12, color: Colors.grey),
                           ),
                           const SizedBox(height: 4),
                           Text(
@@ -176,7 +177,8 @@ class DashboardScreen extends StatelessWidget {
                         children: [
                           Text(
                             localizations.pending,
-                            style: const TextStyle(fontSize: 12, color: Colors.grey),
+                            style: const TextStyle(
+                                fontSize: 12, color: Colors.grey),
                           ),
                           const SizedBox(height: 4),
                           Text(
@@ -202,7 +204,8 @@ class DashboardScreen extends StatelessWidget {
               children: [
                 Text(
                   localizations.recentActivity,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 TextButton(
                   onPressed: () {},

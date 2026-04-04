@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:home_rental_management/l10n/app_localizations.dart';
+import 'package:home_rental_management/core/localization/app_localizations.dart';
 
 import 'package:provider/provider.dart';
-import '../utils/app_provider.dart';
+import '../../../../utils/app_provider.dart';
 
 class PropertyListScreen extends StatelessWidget {
   final Function(String) onSelectProperty;
@@ -104,7 +104,8 @@ class _PropertyCard extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 4),
                     Text(
