@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:home_rental_management/core/localization/app_localizations.dart';
+import 'package:home_rental_management/core/services/notification_service.dart';
 import 'package:home_rental_management/features/properties/presentation/widgets/add_unit_dialog.dart';
 import 'package:home_rental_management/features/properties/presentation/widgets/edit_property_dialog.dart';
 import 'package:home_rental_management/features/properties/presentation/widgets/edit_unit_dialog.dart';
@@ -266,6 +267,38 @@ class PropertyDetailsScreen extends StatelessWidget {
                                     builder: (_) => EditUnitDialog(unit: unit),
                                   );
                                 },
+                                onNotify: () async {
+                                  final date = await showDatePicker(
+                                    context: context,
+                                    initialDate: DateTime.now(),
+                                    firstDate: DateTime.now(),
+                                    lastDate: DateTime.now().add(const Duration(days: 365)),
+                                  );
+                                  if (date == null || !context.mounted) return;
+                                  
+                                  final time = await showTimePicker(
+                                    context: context,
+                                    initialTime: TimeOfDay.now(),
+                                  );
+                                  if (time == null || !context.mounted) return;
+                                  
+                                  final scheduledDate = DateTime(
+                                    date.year, date.month, date.day, time.hour, time.minute
+                                  );
+                                  
+                                  await NotificationService().scheduleNotification(
+                                    id: unit.id.hashCode,
+                                    title: 'Reminder: Unit ${unit.unitNumber}',
+                                    body: 'Scheduled reminder for Unit ${unit.unitNumber}.',
+                                    scheduledDate: scheduledDate,
+                                  );
+                                  
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Reminder set successfully!')),
+                                    );
+                                  }
+                                },
                                 onDelete: () {
                                   showDialog(
                                     context: context,
@@ -369,6 +402,7 @@ class _UnitCard extends StatelessWidget {
   final String status;
   final VoidCallback onTap;
   final VoidCallback onEdit;
+  final VoidCallback onNotify;
   final VoidCallback onDelete;
 
   const _UnitCard({
@@ -378,6 +412,7 @@ class _UnitCard extends StatelessWidget {
     required this.status,
     required this.onTap,
     required this.onEdit,
+    required this.onNotify,
     required this.onDelete,
   });
 
@@ -466,6 +501,8 @@ class _UnitCard extends StatelessWidget {
                       onSelected: (value) {
                         if (value == 'edit') {
                           onEdit();
+                        } else if (value == 'notify') {
+                          onNotify();
                         } else if (value == 'delete') {
                           onDelete();
                         }
@@ -476,6 +513,14 @@ class _UnitCard extends StatelessWidget {
                           child: ListTile(
                             leading: Icon(Icons.edit, color: Colors.blue),
                             title: Text('Edit Unit'),
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
+                        const PopupMenuItem<String>(
+                          value: 'notify',
+                          child: ListTile(
+                            leading: Icon(Icons.notification_add, color: Colors.orange),
+                            title: Text('Set Reminder'),
                             contentPadding: EdgeInsets.zero,
                           ),
                         ),

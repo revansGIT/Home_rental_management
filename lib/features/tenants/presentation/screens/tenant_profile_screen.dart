@@ -13,6 +13,7 @@ import '../../../../core/providers/activity_provider.dart';
 import 'package:home_rental_management/features/tenants/presentation/widgets/edit_tenant_dialog.dart';
 import 'package:home_rental_management/features/finance/presentation/widgets/record_payment_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:home_rental_management/core/services/notification_service.dart';
 import 'dart:io';
 
 class TenantProfileScreen extends StatelessWidget {
@@ -124,6 +125,41 @@ class TenantProfileScreen extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+          IconButton(
+            icon: Icon(Icons.notification_add, color: Theme.of(context).colorScheme.primary),
+            onPressed: () async {
+              final date = await showDatePicker(
+                context: context,
+                initialDate: DateTime.now(),
+                firstDate: DateTime.now(),
+                lastDate: DateTime.now().add(const Duration(days: 365)),
+              );
+              if (date == null || !context.mounted) return;
+              
+              final time = await showTimePicker(
+                context: context,
+                initialTime: TimeOfDay.now(),
+              );
+              if (time == null || !context.mounted) return;
+              
+              final scheduledDate = DateTime(
+                date.year, date.month, date.day, time.hour, time.minute
+              );
+              
+              await NotificationService().scheduleNotification(
+                id: tenant.id.hashCode,
+                title: 'Reminder: ${tenant.name}',
+                body: 'Scheduled reminder for tenant ${tenant.name}.',
+                scheduledDate: scheduledDate,
+              );
+              
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Reminder set successfully!')),
+                );
+              }
+            },
           ),
         ],
       ),

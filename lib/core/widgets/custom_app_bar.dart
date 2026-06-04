@@ -21,10 +21,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: Theme.of(context).colorScheme.shadow.withOpacity(0.04),
             offset: const Offset(0, 4),
             blurRadius: 16,
           ),
@@ -44,10 +44,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                         icon: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.blue[50],
+                            color: Theme.of(context).colorScheme.primaryContainer,
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Icon(Icons.arrow_back_ios_new, size: 18, color: Colors.blue[700]),
+                          child: Icon(Icons.arrow_back_ios_new, size: 18, color: Theme.of(context).colorScheme.onPrimaryContainer),
                         ),
                         onPressed: () => context.pop(),
                       ),
@@ -71,16 +71,16 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
-                          color: Colors.grey[500],
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                           letterSpacing: 0.5,
                         ),
                       ),
                     Text(
                       title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w800,
-                        color: Colors.black87,
+                        color: Theme.of(context).colorScheme.onSurface,
                         letterSpacing: -0.5,
                       ),
                     ),

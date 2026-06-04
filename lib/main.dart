@@ -14,6 +14,7 @@ import 'features/tenants/presentation/providers/tenant_provider.dart';
 import 'features/finance/presentation/providers/finance_provider.dart';
 import 'utils/app_provider.dart';
 import 'core/routes/app_router.dart';
+import 'core/services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,11 +33,24 @@ void main() async {
   await Hive.openBox<PaymentModel>('payments');
   await Hive.openBox<ActivityModel>('activities');
 
+  await NotificationService().init();
+
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    NotificationService().requestPermissions();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,8 +78,19 @@ class MyApp extends StatelessWidget {
               Locale('bn'), // Bengali
             ],
             locale: appProvider.locale,
+            themeMode: appProvider.themeMode,
             theme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: Colors.blue,
+                brightness: Brightness.light,
+              ),
+              useMaterial3: true,
+            ),
+            darkTheme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: Colors.blue,
+                brightness: Brightness.dark,
+              ),
               useMaterial3: true,
             ),
             routerConfig: appRouter,
