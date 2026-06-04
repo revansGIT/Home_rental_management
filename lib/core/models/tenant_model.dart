@@ -28,6 +28,9 @@ class TenantModel {
   @HiveField(7)
   final double serviceCharge;
 
+  @HiveField(8)
+  final String? imagePath;
+
   TenantModel({
     required this.id,
     required this.name,
@@ -37,5 +40,6 @@ class TenantModel {
     required this.leaseEnd,
     required this.advancePaid,
     required this.serviceCharge,
+    this.imagePath,
   });
 }

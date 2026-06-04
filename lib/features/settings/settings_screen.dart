@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:home_rental_management/core/localization/app_localizations.dart';
-import '../../core/widgets/custom_app_bar.dart';
+import '../../../core/widgets/custom_app_bar.dart';
 
 import 'package:provider/provider.dart';
-import '../utils/app_provider.dart';
+import '../../utils/app_provider.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});

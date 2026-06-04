@@ -27,6 +27,7 @@ class TenantProvider extends ChangeNotifier {
     DateTime leaseEnd,
     double advancePaid,
     double serviceCharge,
+    String? imagePath,
   ) async {
     final newTenant = TenantModel(
       id: _uuid.v4(),
@@ -37,6 +38,7 @@ class TenantProvider extends ChangeNotifier {
       leaseEnd: leaseEnd,
       advancePaid: advancePaid,
       serviceCharge: serviceCharge,
+      imagePath: imagePath,
     );
     await _tenantBox.put(newTenant.id, newTenant);
     notifyListeners();
@@ -52,6 +54,7 @@ class TenantProvider extends ChangeNotifier {
     DateTime leaseEnd,
     double advancePaid,
     double serviceCharge,
+    String? imagePath,
   ) async {
     final tenant = _tenantBox.get(id);
     if (tenant != null) {
@@ -64,6 +67,7 @@ class TenantProvider extends ChangeNotifier {
         leaseEnd: leaseEnd,
         advancePaid: advancePaid,
         serviceCharge: serviceCharge,
+        imagePath: imagePath ?? tenant.imagePath,
       );
       await _tenantBox.put(id, updatedTenant);
       notifyListeners();

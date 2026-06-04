@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:home_rental_management/features/properties/presentation/providers/property_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../../core/providers/activity_provider.dart';
 import '../providers/tenant_provider.dart';
 
@@ -18,6 +20,17 @@ class _AddTenantDialogState extends State<AddTenantDialog> {
   String? _selectedUnitId;
   double _advance = 0.0;
   double _serviceCharge = 0.0;
+  String? _imagePath;
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _imagePath = pickedFile.path;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +70,23 @@ class _AddTenantDialogState extends State<AddTenantDialog> {
                             onPressed: () => Navigator.of(context).pop(),
                           )
                         ],
+                      ),
+                      const SizedBox(height: 24),
+                      Center(
+                        child: GestureDetector(
+                          onTap: _pickImage,
+                          child: CircleAvatar(
+                            radius: 50,
+                            backgroundColor: Colors.blue[50],
+                            backgroundImage: _imagePath != null
+                                ? FileImage(File(_imagePath!))
+                                : null,
+                            child: _imagePath == null
+                                ? Icon(Icons.add_a_photo,
+                                    size: 30, color: Colors.blue[700])
+                                : null,
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 24),
                       TextFormField(
@@ -170,7 +200,8 @@ class _AddTenantDialogState extends State<AddTenantDialog> {
                                   DateTime.now(),
                                   DateTime.now().add(const Duration(days: 365)),
                                   _advance,
-                                  _serviceCharge);
+                                  _serviceCharge,
+                                  _imagePath);
 
                               await propertiesProv.assignTenantToUnit(
                                   _selectedUnitId!, tId);

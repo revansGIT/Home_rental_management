@@ -11,6 +11,9 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
 import '../../../../core/providers/activity_provider.dart';
 import 'package:home_rental_management/features/tenants/presentation/widgets/edit_tenant_dialog.dart';
+import 'package:home_rental_management/features/finance/presentation/widgets/record_payment_dialog.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'dart:io';
 
 class TenantProfileScreen extends StatelessWidget {
   final String tenantId;
@@ -148,8 +151,12 @@ class TenantProfileScreen extends StatelessWidget {
                   CircleAvatar(
                     radius: 40,
                     backgroundColor: Colors.blue[100],
-                    child:
-                        Icon(Icons.person, size: 40, color: Colors.blue[700]),
+                    backgroundImage: tenant.imagePath != null
+                        ? FileImage(File(tenant.imagePath!))
+                        : null,
+                    child: tenant.imagePath == null
+                        ? Icon(Icons.person, size: 40, color: Colors.blue[700])
+                        : null,
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -280,7 +287,12 @@ class TenantProfileScreen extends StatelessWidget {
               children: [
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: () {},
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (_) => RecordPaymentDialog(initialTenantId: tenant.id),
+                      );
+                    },
                     icon: const Icon(Icons.payment),
                     label: Text(localizations.recordPayment),
                     style: ElevatedButton.styleFrom(
@@ -291,9 +303,20 @@ class TenantProfileScreen extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.message),
-                    label: Text(localizations.sendMessage),
+                    onPressed: () async {
+                      final Uri url = Uri.parse('tel:${tenant.phone}');
+                      if (await canLaunchUrl(url)) {
+                        await launchUrl(url);
+                      } else {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Could not launch phone dialer')),
+                          );
+                        }
+                      }
+                    },
+                    icon: const Icon(Icons.phone),
+                    label: Text('Call ${tenant.name.split(' ').first}'),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),

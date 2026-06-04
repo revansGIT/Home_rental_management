@@ -5,7 +5,8 @@ import '../../../../core/providers/activity_provider.dart';
 import '../providers/finance_provider.dart';
 
 class RecordPaymentDialog extends StatefulWidget {
-  const RecordPaymentDialog({super.key});
+  final String? initialTenantId;
+  const RecordPaymentDialog({super.key, this.initialTenantId});
 
   @override
   State<RecordPaymentDialog> createState() => _RecordPaymentDialogState();
@@ -16,6 +17,12 @@ class _RecordPaymentDialogState extends State<RecordPaymentDialog> {
   String? _selectedTenantId;
   double _amount = 0.0;
   String _status = 'Collected';
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedTenantId = widget.initialTenantId;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +62,7 @@ class _RecordPaymentDialogState extends State<RecordPaymentDialog> {
                     ),
                     const SizedBox(height: 24),
                     DropdownButtonFormField<String>(
+                      initialValue: _selectedTenantId,
                       decoration: InputDecoration(
                         labelText: 'Select Tenant',
                         border: OutlineInputBorder(

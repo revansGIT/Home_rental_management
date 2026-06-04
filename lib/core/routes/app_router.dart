@@ -9,16 +9,18 @@ import '../../features/properties/presentation/screens/property_details_screen.d
 import '../../features/tenants/presentation/screens/tenant_list_screen.dart';
 import '../../features/tenants/presentation/screens/tenant_profile_screen.dart';
 import '../../features/finance/presentation/screens/financial_reports_screen.dart';
-import '../../screens/settings_screen.dart';
+import '../../features/settings/settings_screen.dart';
 
-final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
+final GlobalKey<NavigatorState> _rootNavigatorKey =
+    GlobalKey<NavigatorState>(debugLabel: 'root');
 
 final GoRouter appRouter = GoRouter(
   navigatorKey: _rootNavigatorKey,
   initialLocation: '/',
   routes: <RouteBase>[
     StatefulShellRoute.indexedStack(
-      builder: (BuildContext context, GoRouterState state, StatefulNavigationShell navigationShell) {
+      builder: (BuildContext context, GoRouterState state,
+          StatefulNavigationShell navigationShell) {
         return ScaffoldWithNavBar(navigationShell: navigationShell);
       },
       branches: <StatefulShellBranch>[
@@ -26,15 +28,16 @@ final GoRouter appRouter = GoRouter(
         StatefulShellBranch(
           routes: <RouteBase>[
             GoRoute(
-              path: '/',
-              builder: (BuildContext context, GoRouterState state) => const DashboardScreen(),
-              routes: [
-                GoRoute(
-                  path: 'recent-activity',
-                  builder: (BuildContext context, GoRouterState state) => const RecentActivityScreen(),
-                ),
-              ]
-            ),
+                path: '/',
+                builder: (BuildContext context, GoRouterState state) =>
+                    const DashboardScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'recent-activity',
+                    builder: (BuildContext context, GoRouterState state) =>
+                        const RecentActivityScreen(),
+                  ),
+                ]),
           ],
         ),
 
@@ -43,7 +46,8 @@ final GoRouter appRouter = GoRouter(
           routes: <RouteBase>[
             GoRoute(
               path: '/properties',
-              builder: (BuildContext context, GoRouterState state) => const PropertyListScreen(),
+              builder: (BuildContext context, GoRouterState state) =>
+                  const PropertyListScreen(),
               routes: [
                 GoRoute(
                   path: ':id',
@@ -62,7 +66,8 @@ final GoRouter appRouter = GoRouter(
           routes: <RouteBase>[
             GoRoute(
               path: '/tenants',
-              builder: (BuildContext context, GoRouterState state) => const TenantListScreen(),
+              builder: (BuildContext context, GoRouterState state) =>
+                  const TenantListScreen(),
               routes: [
                 GoRoute(
                   path: ':id',
@@ -81,7 +86,8 @@ final GoRouter appRouter = GoRouter(
           routes: <RouteBase>[
             GoRoute(
               path: '/financial',
-              builder: (BuildContext context, GoRouterState state) => const FinancialReportsScreen(),
+              builder: (BuildContext context, GoRouterState state) =>
+                  const FinancialReportsScreen(),
             ),
           ],
         ),
@@ -91,7 +97,8 @@ final GoRouter appRouter = GoRouter(
           routes: <RouteBase>[
             GoRoute(
               path: '/settings',
-              builder: (BuildContext context, GoRouterState state) => const SettingsScreen(),
+              builder: (BuildContext context, GoRouterState state) =>
+                  const SettingsScreen(),
             ),
           ],
         ),

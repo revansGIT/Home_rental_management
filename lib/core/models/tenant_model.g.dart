@@ -25,13 +25,14 @@ class TenantModelAdapter extends TypeAdapter<TenantModel> {
       leaseEnd: fields[5] as DateTime,
       advancePaid: fields[6] as double,
       serviceCharge: fields[7] as double,
+      imagePath: fields[8] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, TenantModel obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -47,7 +48,9 @@ class TenantModelAdapter extends TypeAdapter<TenantModel> {
       ..writeByte(6)
       ..write(obj.advancePaid)
       ..writeByte(7)
-      ..write(obj.serviceCharge);
+      ..write(obj.serviceCharge)
+      ..writeByte(8)
+      ..write(obj.imagePath);
   }
 
   @override

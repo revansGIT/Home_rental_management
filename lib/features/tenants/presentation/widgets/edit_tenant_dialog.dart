@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:home_rental_management/core/models/tenant_model.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../../core/providers/activity_provider.dart';
 import '../providers/tenant_provider.dart';
 
@@ -18,6 +20,17 @@ class _EditTenantDialogState extends State<EditTenantDialog> {
   late String _phone;
   late double _advance;
   late double _serviceCharge;
+  String? _imagePath;
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _imagePath = pickedFile.path;
+      });
+    }
+  }
 
   @override
   void initState() {
@@ -26,6 +39,7 @@ class _EditTenantDialogState extends State<EditTenantDialog> {
     _phone = widget.tenant.phone;
     _advance = widget.tenant.advancePaid;
     _serviceCharge = widget.tenant.serviceCharge;
+    _imagePath = widget.tenant.imagePath;
   }
 
   @override
@@ -55,6 +69,23 @@ class _EditTenantDialogState extends State<EditTenantDialog> {
                       onPressed: () => Navigator.of(context).pop(),
                     )
                   ],
+                ),
+                const SizedBox(height: 24),
+                Center(
+                  child: GestureDetector(
+                    onTap: _pickImage,
+                    child: CircleAvatar(
+                      radius: 50,
+                      backgroundColor: Colors.blue[50],
+                      backgroundImage: _imagePath != null
+                          ? FileImage(File(_imagePath!))
+                          : null,
+                      child: _imagePath == null
+                          ? Icon(Icons.add_a_photo,
+                              size: 30, color: Colors.blue[700])
+                          : null,
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 24),
                 TextFormField(
@@ -148,7 +179,8 @@ class _EditTenantDialogState extends State<EditTenantDialog> {
                             widget.tenant.leaseStart,
                             widget.tenant.leaseEnd,
                             _advance,
-                            _serviceCharge);
+                            _serviceCharge,
+                            _imagePath);
 
                         actProv.logActivity(
                           iconCode: 'person_add',
