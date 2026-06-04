@@ -22,13 +22,14 @@ class PropertyModelAdapter extends TypeAdapter<PropertyModel> {
       address: fields[2] as String,
       totalUnits: fields[3] as int,
       yearBuilt: fields[4] as int,
+      imagePath: fields[5] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, PropertyModel obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -38,7 +39,9 @@ class PropertyModelAdapter extends TypeAdapter<PropertyModel> {
       ..writeByte(3)
       ..write(obj.totalUnits)
       ..writeByte(4)
-      ..write(obj.yearBuilt);
+      ..write(obj.yearBuilt)
+      ..writeByte(5)
+      ..write(obj.imagePath);
   }
 
   @override

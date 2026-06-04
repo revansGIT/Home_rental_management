@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:home_rental_management/core/localization/app_localizations.dart';
+import 'package:home_rental_management/core/providers/activity_provider.dart';
 import 'package:home_rental_management/features/finance/presentation/providers/finance_provider.dart';
 import 'package:home_rental_management/features/finance/presentation/widgets/record_payment_dialog.dart';
 import 'package:home_rental_management/features/properties/presentation/providers/property_provider.dart';
@@ -8,19 +9,11 @@ import 'package:home_rental_management/features/tenants/presentation/providers/t
 import 'package:home_rental_management/features/tenants/presentation/widgets/add_tenant_dialog.dart';
 import 'package:provider/provider.dart';
 import '../../../../utils/app_provider.dart';
-import '../../../../core/providers/activity_provider.dart';
-import 'recent_activity_screen.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:go_router/go_router.dart';
 
 class DashboardScreen extends StatelessWidget {
-  final Function(String) onNavigateToProperty;
-  final Function(String) onNavigateToTenant;
-
-  const DashboardScreen({
-    super.key,
-    required this.onNavigateToProperty,
-    required this.onNavigateToTenant,
-  });
+  const DashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -240,14 +233,7 @@ class DashboardScreen extends StatelessWidget {
                 ),
                 TextButton(
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => RecentActivityScreen(
-                          onBack: () => Navigator.pop(context),
-                        ),
-                      ),
-                    );
+                    context.push('/recent-activity');
                   },
                   child: Text(localizations.viewAll),
                 ),

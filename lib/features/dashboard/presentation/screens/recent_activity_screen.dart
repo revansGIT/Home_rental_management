@@ -5,9 +5,7 @@ import '../../../../core/providers/activity_provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class RecentActivityScreen extends StatelessWidget {
-  final VoidCallback onBack;
-  
-  const RecentActivityScreen({super.key, required this.onBack});
+  const RecentActivityScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -20,10 +18,6 @@ class RecentActivityScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: onBack,
-        ),
         title: Text(
           localizations.recentActivity,
           style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),

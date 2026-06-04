@@ -25,8 +25,42 @@ class PropertyProvider extends ChangeNotifier {
       address: address,
       totalUnits: 0,
       yearBuilt: yearBuilt,
+      imagePath: null,
     );
     await _propertyBox.put(newProperty.id, newProperty);
+    notifyListeners();
+  }
+
+  Future<void> updateProperty(
+    String id,
+    String name,
+    String address,
+    int yearBuilt,
+    String? imagePath,
+  ) async {
+    final property = _propertyBox.get(id);
+    if (property != null) {
+      final updatedProperty = PropertyModel(
+        id: property.id,
+        name: name,
+        address: address,
+        totalUnits: property.totalUnits,
+        yearBuilt: yearBuilt,
+        imagePath: imagePath,
+      );
+      await _propertyBox.put(id, updatedProperty);
+      notifyListeners();
+    }
+  }
+
+  Future<void> deleteProperty(String id) async {
+    // Delete associated units first
+    final unitsToDelete = _unitBox.values.where((u) => u.propertyId == id).toList();
+    for (var unit in unitsToDelete) {
+      await _unitBox.delete(unit.id);
+    }
+    // Delete property
+    await _propertyBox.delete(id);
     notifyListeners();
   }
 
@@ -48,6 +82,7 @@ class PropertyProvider extends ChangeNotifier {
         address: property.address,
         totalUnits: property.totalUnits + 1,
         yearBuilt: property.yearBuilt,
+        imagePath: property.imagePath,
       );
       await _propertyBox.put(property.id, updatedProperty);
     }

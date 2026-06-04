@@ -7,15 +7,14 @@ import 'package:provider/provider.dart';
 import '../../../../utils/app_provider.dart';
 import '../providers/tenant_provider.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 
 class TenantProfileScreen extends StatelessWidget {
   final String tenantId;
-  final VoidCallback onBack;
 
   const TenantProfileScreen({
     super.key,
     required this.tenantId,
-    required this.onBack,
   });
 
   @override
@@ -32,7 +31,7 @@ class TenantProfileScreen extends StatelessWidget {
       return Scaffold(
         appBar: AppBar(
             leading: IconButton(
-                icon: const Icon(Icons.arrow_back), onPressed: onBack)),
+                icon: const Icon(Icons.arrow_back), onPressed: () => context.pop())),
         body: const Center(child: Text('Tenant not found.')),
       );
     }
@@ -54,7 +53,8 @@ class TenantProfileScreen extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: onBack,
+          color: Colors.black87,
+          onPressed: () => context.pop(),
         ),
         title: const Text(
           'Tenant Profile',

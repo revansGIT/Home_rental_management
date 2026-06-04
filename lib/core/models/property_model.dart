@@ -19,11 +19,15 @@ class PropertyModel {
   @HiveField(4)
   final int yearBuilt;
 
+  @HiveField(5)
+  final String? imagePath;
+
   PropertyModel({
     required this.id,
     required this.name,
     required this.address,
     required this.totalUnits,
     required this.yearBuilt,
+    this.imagePath,
   });
 }
