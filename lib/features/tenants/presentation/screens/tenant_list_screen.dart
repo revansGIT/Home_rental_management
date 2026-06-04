@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/localization/app_localizations.dart';
+import '../../../../core/widgets/custom_app_bar.dart';
 import '../providers/tenant_provider.dart';
 import '../widgets/add_tenant_dialog.dart';
 
@@ -16,23 +17,16 @@ class TenantListScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text(
-          localizations.tenants,
-          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87),
-        ),
+      appBar: CustomAppBar(
+        title: localizations.tenants,
+        showBackButton: false,
         actions: [
           IconButton(
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.blue[50],
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(Icons.person_add, color: Colors.blue[700], size: 20),
+            style: IconButton.styleFrom(
+              backgroundColor: Colors.blue[50],
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
+            icon: Icon(Icons.person_add, color: Colors.blue[700], size: 20),
             tooltip: 'Add Tenant', // Should be localized
             onPressed: () {
               showDialog(
@@ -41,7 +35,6 @@ class TenantListScreen extends StatelessWidget {
               );
             },
           ),
-          const SizedBox(width: 8),
         ],
       ),
       body: tenants.isEmpty

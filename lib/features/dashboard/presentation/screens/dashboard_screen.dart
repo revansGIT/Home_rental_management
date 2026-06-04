@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:home_rental_management/core/localization/app_localizations.dart';
-import 'package:home_rental_management/core/providers/activity_provider.dart';
 import 'package:home_rental_management/features/finance/presentation/providers/finance_provider.dart';
+import 'package:home_rental_management/core/providers/activity_provider.dart';
 import 'package:home_rental_management/features/finance/presentation/widgets/record_payment_dialog.dart';
 import 'package:home_rental_management/features/properties/presentation/providers/property_provider.dart';
 import 'package:home_rental_management/features/properties/presentation/widgets/add_property_dialog.dart';
@@ -9,6 +9,7 @@ import 'package:home_rental_management/features/tenants/presentation/providers/t
 import 'package:home_rental_management/features/tenants/presentation/widgets/add_tenant_dialog.dart';
 import 'package:provider/provider.dart';
 import '../../../../utils/app_provider.dart';
+import '../../../../core/widgets/custom_app_bar.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:go_router/go_router.dart';
 
@@ -32,22 +33,10 @@ class DashboardScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              localizations.welcomeBack,
-              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-            ),
-            Text(
-              localizations.propertyManagerDashboard,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
+      appBar: CustomAppBar(
+        subtitle: localizations.welcomeBack,
+        title: localizations.propertyManagerDashboard,
+        showBackButton: false,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),

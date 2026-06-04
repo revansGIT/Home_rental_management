@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:home_rental_management/core/localization/app_localizations.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/providers/activity_provider.dart';
+import '../../../../core/widgets/custom_app_bar.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class RecentActivityScreen extends StatelessWidget {
@@ -15,13 +16,8 @@ class RecentActivityScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text(
-          localizations.recentActivity,
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
-        ),
+      appBar: CustomAppBar(
+        title: localizations.recentActivity,
       ),
       body: activities.isEmpty
           ? const Center(child: Text('No recent activity'))

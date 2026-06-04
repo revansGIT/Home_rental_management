@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:home_rental_management/core/localization/app_localizations.dart';
+import '../../core/widgets/custom_app_bar.dart';
 
 import 'package:provider/provider.dart';
 import '../utils/app_provider.dart';
@@ -14,13 +15,9 @@ class SettingsScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text(
-          localizations.appSettings,
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
+      appBar: CustomAppBar(
+        title: localizations.settings,
+        showBackButton: false,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),

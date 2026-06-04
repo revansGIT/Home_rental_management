@@ -8,6 +8,7 @@ import '../../../../utils/app_provider.dart';
 import '../providers/tenant_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/widgets/custom_app_bar.dart';
 
 class TenantProfileScreen extends StatelessWidget {
   final String tenantId;
@@ -48,18 +49,39 @@ class TenantProfileScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          color: Colors.black87,
-          onPressed: () => context.pop(),
-        ),
-        title: const Text(
-          'Tenant Profile',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
+      appBar: CustomAppBar(
+        title: tenant.name,
+        subtitle: 'Tenant Profile',
+        actions: [
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert, color: Colors.black87),
+            onSelected: (value) {
+              if (value == 'edit') {
+                // TODO: Implement edit
+              } else if (value == 'delete') {
+                // TODO: Implement delete
+              }
+            },
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+              const PopupMenuItem<String>(
+                value: 'edit',
+                child: ListTile(
+                  leading: Icon(Icons.edit, color: Colors.blue),
+                  title: Text('Edit Tenant'),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'delete',
+                child: ListTile(
+                  leading: Icon(Icons.delete, color: Colors.red),
+                  title: Text('Delete Tenant', style: TextStyle(color: Colors.red)),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),

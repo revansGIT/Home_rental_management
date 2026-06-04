@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:home_rental_management/core/localization/app_localizations.dart';
 import 'package:provider/provider.dart';
 import '../../../../utils/app_provider.dart';
+import '../../../../core/widgets/custom_app_bar.dart';
 import '../providers/finance_provider.dart';
 import 'package:intl/intl.dart';
 
@@ -20,22 +21,25 @@ class FinancialReportsScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              localizations.financialReports,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+      appBar: CustomAppBar(
+        title: localizations.financialReports,
+        showBackButton: false,
+        actions: [
+          IconButton(
+            style: IconButton.styleFrom(
+              backgroundColor: Colors.blue[50],
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            Text(
-              localizations.trackRevenueExpenses,
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
-            ),
-          ],
-        ),
+            icon: Icon(Icons.payment, color: Colors.blue[700], size: 20),
+            tooltip: 'Record Payment', 
+            onPressed: () {
+              // showDialog(
+              //   context: context,
+              //   builder: (_) => const RecordPaymentDialog(),
+              // );
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
