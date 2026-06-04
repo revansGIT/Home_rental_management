@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:home_rental_management/core/localization/app_localizations.dart';
 import 'package:provider/provider.dart';
+import 'core/models/property_model.dart';
+import 'core/models/unit_model.dart';
+import 'core/models/tenant_model.dart';
+import 'core/models/payment_model.dart';
+import 'features/properties/presentation/providers/property_provider.dart';
+import 'features/tenants/presentation/providers/tenant_provider.dart';
+import 'features/finance/presentation/providers/finance_provider.dart';
 import 'utils/app_provider.dart';
 import 'features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'features/properties/presentation/screens/property_list_screen.dart';
@@ -10,7 +18,21 @@ import 'features/tenants/presentation/screens/tenant_profile_screen.dart';
 import 'features/finance/presentation/screens/financial_reports_screen.dart';
 import 'screens/settings_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  
+  Hive.registerAdapter(PropertyModelAdapter());
+  Hive.registerAdapter(UnitModelAdapter());
+  Hive.registerAdapter(TenantModelAdapter());
+  Hive.registerAdapter(PaymentModelAdapter());
+
+  await Hive.openBox('settings');
+  await Hive.openBox<PropertyModel>('properties');
+  await Hive.openBox<UnitModel>('units');
+  await Hive.openBox<TenantModel>('tenants');
+  await Hive.openBox<PaymentModel>('payments');
+  
   runApp(const MyApp());
 }
 
@@ -19,8 +41,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => AppProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AppProvider()),
+        ChangeNotifierProvider(create: (_) => PropertyProvider()),
+        ChangeNotifierProvider(create: (_) => TenantProvider()),
+        ChangeNotifierProvider(create: (_) => FinanceProvider()),
+      ],
       child: Consumer<AppProvider>(
         builder: (context, appProvider, _) {
           return MaterialApp(

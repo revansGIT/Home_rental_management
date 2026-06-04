@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:home_rental_management/core/localization/app_localizations.dart';
-
 import 'package:provider/provider.dart';
-import '../../../../utils/app_provider.dart';
+import '../providers/property_provider.dart';
 
 class PropertyListScreen extends StatelessWidget {
   final Function(String) onSelectProperty;
@@ -12,7 +11,8 @@ class PropertyListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
-    final appProvider = Provider.of<AppProvider>(context);
+    final propertyProv = context.watch<PropertyProvider>();
+    final properties = propertyProv.properties;
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
@@ -42,19 +42,25 @@ class PropertyListScreen extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: 5,
-              itemBuilder: (context, index) {
-                return _PropertyCard(
-                  title: 'Building ${index + 1}',
-                  subtitle: '${(index + 1) * 4} ${localizations.units}',
-                  revenue: appProvider.formatCurrency((index + 1) * 25000),
-                  occupancyRate: '${85 + index}%',
-                  onTap: () => onSelectProperty('property_$index'),
-                );
-              },
-            ),
+            child: properties.isEmpty
+                ? const Center(child: Text('No properties found.'))
+                : ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: properties.length,
+                    itemBuilder: (context, index) {
+                      final prop = properties[index];
+
+                      return _PropertyCard(
+                        title: prop.name,
+                        subtitle: '${prop.totalUnits} ${localizations.units}',
+                        revenue:
+                            '', // Calculate this via FinanceProvider if needed, but for now leave empty or calculated later.
+                        occupancyRate:
+                            '', // We can calculate this from UnitModel.
+                        onTap: () => onSelectProperty(prop.id),
+                      );
+                    },
+                  ),
           ),
         ],
       ),

@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:home_rental_management/core/localization/app_localizations.dart';
+import 'package:home_rental_management/features/finance/presentation/providers/finance_provider.dart';
+import 'package:home_rental_management/features/finance/presentation/widgets/record_payment_dialog.dart';
+import 'package:home_rental_management/features/properties/presentation/providers/property_provider.dart';
+import 'package:home_rental_management/features/properties/presentation/widgets/add_property_dialog.dart';
+import 'package:home_rental_management/features/tenants/presentation/providers/tenant_provider.dart';
+import 'package:home_rental_management/features/tenants/presentation/widgets/add_tenant_dialog.dart';
 import 'package:provider/provider.dart';
 import '../../../../utils/app_provider.dart';
 
@@ -17,6 +23,15 @@ class DashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
     final appProvider = Provider.of<AppProvider>(context);
+    final propertyProv = context.watch<PropertyProvider>();
+    final tenantProv = context.watch<TenantProvider>();
+    final financeProv = context.watch<FinanceProvider>();
+
+    int totalBuildings = propertyProv.properties.length;
+    int totalUnits = propertyProv.units.length;
+    int totalTenants = tenantProv.tenants.length;
+    double collected = financeProv.totalCollected;
+    double pending = financeProv.totalPending;
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
@@ -48,7 +63,7 @@ class DashboardScreen extends StatelessWidget {
                 Expanded(
                   child: _StatCard(
                     title: localizations.buildings,
-                    value: appProvider.formatNumber(12),
+                    value: appProvider.formatNumber(totalBuildings),
                     icon: Icons.business,
                     color: Colors.blue,
                   ),
@@ -57,7 +72,7 @@ class DashboardScreen extends StatelessWidget {
                 Expanded(
                   child: _StatCard(
                     title: localizations.units,
-                    value: appProvider.formatNumber(48),
+                    value: appProvider.formatNumber(totalUnits),
                     icon: Icons.apartment,
                     color: Colors.green,
                   ),
@@ -70,7 +85,7 @@ class DashboardScreen extends StatelessWidget {
                 Expanded(
                   child: _StatCard(
                     title: localizations.totalTenants,
-                    value: appProvider.formatNumber(42),
+                    value: appProvider.formatNumber(totalTenants),
                     icon: Icons.people,
                     color: Colors.orange,
                   ),
@@ -79,7 +94,7 @@ class DashboardScreen extends StatelessWidget {
                 Expanded(
                   child: _StatCard(
                     title: localizations.thisMonth,
-                    value: appProvider.formatCurrency(125000),
+                    value: appProvider.formatCurrency(collected),
                     icon: Icons.attach_money,
                     color: Colors.purple,
                   ),
@@ -100,7 +115,11 @@ class DashboardScreen extends StatelessWidget {
                   child: _ActionButton(
                     icon: Icons.add_business,
                     label: localizations.addProperty,
-                    onTap: () {},
+                    onTap: () {
+                      showDialog(
+                          context: context,
+                          builder: (_) => const AddPropertyDialog());
+                    },
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -108,7 +127,11 @@ class DashboardScreen extends StatelessWidget {
                   child: _ActionButton(
                     icon: Icons.person_add,
                     label: localizations.addTenant,
-                    onTap: () {},
+                    onTap: () {
+                      showDialog(
+                          context: context,
+                          builder: (_) => const AddTenantDialog());
+                    },
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -116,7 +139,11 @@ class DashboardScreen extends StatelessWidget {
                   child: _ActionButton(
                     icon: Icons.payment,
                     label: localizations.addPayment,
-                    onTap: () {},
+                    onTap: () {
+                      showDialog(
+                          context: context,
+                          builder: (_) => const RecordPaymentDialog());
+                    },
                   ),
                 ),
               ],
@@ -136,7 +163,7 @@ class DashboardScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
+                    color: Colors.grey.withValues(alpha: 0.1),
                     spreadRadius: 1,
                     blurRadius: 4,
                   ),
@@ -163,7 +190,7 @@ class DashboardScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            appProvider.formatCurrency(95000),
+                            appProvider.formatCurrency(collected),
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -182,7 +209,7 @@ class DashboardScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            appProvider.formatCurrency(30000),
+                            appProvider.formatCurrency(pending),
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -220,13 +247,13 @@ class DashboardScreen extends StatelessWidget {
               subtitle: 'Flat 3A - ${appProvider.formatCurrency(15000)}',
               time: '2h ago',
             ),
-            _ActivityItem(
+            const _ActivityItem(
               icon: Icons.person_add,
               title: 'New Tenant Added',
               subtitle: 'Building 2 - Unit 5B',
               time: '5h ago',
             ),
-            _ActivityItem(
+            const _ActivityItem(
               icon: Icons.build,
               title: 'Maintenance Request',
               subtitle: 'Building 1 - Unit 2C',
@@ -261,7 +288,7 @@ class _StatCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             spreadRadius: 1,
             blurRadius: 4,
           ),
@@ -347,7 +374,7 @@ class _ActivityItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             spreadRadius: 1,
             blurRadius: 2,
           ),

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:home_rental_management/core/localization/app_localizations.dart';
+import 'package:home_rental_management/features/finance/presentation/providers/finance_provider.dart';
+import 'package:home_rental_management/features/properties/presentation/providers/property_provider.dart';
 
 import 'package:provider/provider.dart';
 import '../../../../utils/app_provider.dart';
+import '../providers/tenant_provider.dart';
+import 'package:intl/intl.dart';
 
 class TenantProfileScreen extends StatelessWidget {
   final String tenantId;
@@ -18,6 +22,30 @@ class TenantProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
     final appProvider = Provider.of<AppProvider>(context);
+    final tenantProv = context.watch<TenantProvider>();
+    final propertyProv = context.watch<PropertyProvider>();
+    final financeProv = context.watch<FinanceProvider>();
+
+    final tenant = tenantProv.getTenant(tenantId);
+
+    if (tenant == null) {
+      return Scaffold(
+        appBar: AppBar(
+            leading: IconButton(
+                icon: const Icon(Icons.arrow_back), onPressed: onBack)),
+        body: const Center(child: Text('Tenant not found.')),
+      );
+    }
+
+    final unit = propertyProv.units.firstWhere((u) => u.id == tenant.unitId,
+        orElse: () => throw Exception('Unit not found'));
+    final property = propertyProv.getProperty(unit.propertyId);
+
+    final payments = financeProv.getPaymentsForTenant(tenant.id);
+    final totalPaid = payments
+        .where((p) => p.status == 'Collected')
+        .fold(0.0, (sum, p) => sum + p.amount);
+    final onTimeCount = payments.where((p) => p.status == 'Collected').length;
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
@@ -46,7 +74,7 @@ class TenantProfileScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
+                    color: Colors.grey.withValues(alpha: 0.1),
                     spreadRadius: 1,
                     blurRadius: 4,
                   ),
@@ -61,24 +89,26 @@ class TenantProfileScreen extends StatelessWidget {
                         Icon(Icons.person, size: 40, color: Colors.blue[700]),
                   ),
                   const SizedBox(width: 16),
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'John Doe',
-                          style: TextStyle(
+                          tenant.name,
+                          style: const TextStyle(
                               fontSize: 18, fontWeight: FontWeight.bold),
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         Text(
-                          'Building 1 - Unit 3A',
-                          style: TextStyle(fontSize: 14, color: Colors.grey),
+                          '${property?.name ?? "Unknown"} - Unit ${unit.unitNumber}',
+                          style:
+                              const TextStyle(fontSize: 14, color: Colors.grey),
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         Text(
-                          '+880 1234-567890',
-                          style: TextStyle(fontSize: 14, color: Colors.grey),
+                          tenant.phone,
+                          style:
+                              const TextStyle(fontSize: 14, color: Colors.grey),
                         ),
                       ],
                     ),
@@ -101,7 +131,7 @@ class TenantProfileScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
+                    color: Colors.grey.withValues(alpha: 0.1),
                     spreadRadius: 1,
                     blurRadius: 4,
                   ),
@@ -110,16 +140,19 @@ class TenantProfileScreen extends StatelessWidget {
               child: Column(
                 children: [
                   _InfoRow(
-                      label: localizations.leaseStart, value: 'Jan 1, 2024'),
+                      label: localizations.leaseStart,
+                      value:
+                          DateFormat('MMM d, yyyy').format(tenant.leaseStart)),
                   _InfoRow(
-                      label: localizations.leaseEnd, value: 'Dec 31, 2024'),
+                      label: localizations.leaseEnd,
+                      value: DateFormat('MMM d, yyyy').format(tenant.leaseEnd)),
                   _InfoRow(
                     label: localizations.monthlyRent,
-                    value: appProvider.formatCurrency(15000),
+                    value: appProvider.formatCurrency(unit.rentAmount),
                   ),
                   _InfoRow(
                     label: localizations.securityDeposit,
-                    value: appProvider.formatCurrency(30000),
+                    value: appProvider.formatCurrency(tenant.advancePaid),
                   ),
                 ],
               ),
@@ -137,7 +170,7 @@ class TenantProfileScreen extends StatelessWidget {
                 Expanded(
                   child: _StatCard(
                     title: localizations.totalPaid,
-                    value: appProvider.formatCurrency(180000),
+                    value: appProvider.formatCurrency(totalPaid),
                     color: Colors.green,
                   ),
                 ),
@@ -145,7 +178,7 @@ class TenantProfileScreen extends StatelessWidget {
                 Expanded(
                   child: _StatCard(
                     title: localizations.onTime,
-                    value: appProvider.formatNumber(12),
+                    value: appProvider.formatNumber(onTimeCount),
                     color: Colors.blue,
                   ),
                 ),
@@ -159,18 +192,24 @@ class TenantProfileScreen extends StatelessWidget {
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: 5,
-              itemBuilder: (context, index) {
-                return _PaymentHistoryItem(
-                  date: 'Jan ${index + 1}, 2024',
-                  amount: appProvider.formatCurrency(15000),
-                  status: 'Paid',
-                );
-              },
-            ),
+            payments.isEmpty
+                ? const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 24),
+                    child: Center(child: Text('No payments recorded.')),
+                  )
+                : ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: payments.length,
+                    itemBuilder: (context, index) {
+                      final payment = payments[index];
+                      return _PaymentHistoryItem(
+                        date: DateFormat('MMM d, yyyy').format(payment.date),
+                        amount: appProvider.formatCurrency(payment.amount),
+                        status: payment.status,
+                      );
+                    },
+                  ),
             const SizedBox(height: 16),
 
             // Action Buttons
@@ -247,7 +286,7 @@ class _StatCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             spreadRadius: 1,
             blurRadius: 4,
           ),
@@ -293,7 +332,7 @@ class _PaymentHistoryItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             spreadRadius: 1,
             blurRadius: 2,
           ),

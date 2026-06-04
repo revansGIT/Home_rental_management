@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:home_rental_management/core/localization/app_localizations.dart';
 import 'package:provider/provider.dart';
 import '../../../../utils/app_provider.dart';
+import '../providers/finance_provider.dart';
+import 'package:intl/intl.dart';
 
 class FinancialReportsScreen extends StatelessWidget {
   const FinancialReportsScreen({super.key});
@@ -10,6 +12,11 @@ class FinancialReportsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
     final appProvider = Provider.of<AppProvider>(context);
+    final financeProv = context.watch<FinanceProvider>();
+    
+    final payments = financeProv.payments;
+    final totalCollected = financeProv.totalCollected;
+    final totalPending = financeProv.totalPending;
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
@@ -53,7 +60,7 @@ class FinancialReportsScreen extends StatelessWidget {
                 Expanded(
                   child: _SummaryCard(
                     title: localizations.totalRevenue,
-                    value: appProvider.formatCurrency(125000),
+                    value: appProvider.formatCurrency(totalCollected),
                     color: Colors.green,
                     icon: Icons.trending_up,
                   ),
@@ -62,7 +69,7 @@ class FinancialReportsScreen extends StatelessWidget {
                 Expanded(
                   child: _SummaryCard(
                     title: localizations.totalExpense,
-                    value: appProvider.formatCurrency(45000),
+                    value: appProvider.formatCurrency(totalPending),
                     color: Colors.red,
                     icon: Icons.trending_down,
                   ),
@@ -93,7 +100,7 @@ class FinancialReportsScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
+                    color: Colors.grey.withValues(alpha: 0.1),
                     spreadRadius: 1,
                     blurRadius: 4,
                   ),
@@ -130,18 +137,23 @@ class FinancialReportsScreen extends StatelessWidget {
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
-            ListView.builder(
+            payments.isEmpty
+              ? const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 24),
+                  child: Center(child: Text('No payments recorded.')),
+                )
+              : ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: 5,
+              itemCount: payments.length,
               itemBuilder: (context, index) {
-                final isIncome = index % 2 == 0;
+                final payment = payments[index];
                 return _TransactionItem(
-                  title: isIncome ? 'Payment Received' : 'Maintenance Payment',
-                  subtitle: 'Building ${index + 1}',
-                  amount: appProvider.formatCurrency((index + 1) * 5000),
-                  isIncome: isIncome,
-                  date: 'Jan ${index + 1}, 2024',
+                  title: payment.description,
+                  subtitle: DateFormat('MMM d, yyyy').format(payment.date),
+                  amount: appProvider.formatCurrency(payment.amount),
+                  isIncome: payment.status == 'Collected',
+                  date: '', // Not used anymore as it's merged into subtitle in our previous attempt
                 );
               },
             ),
@@ -218,7 +230,7 @@ class _SummaryCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             spreadRadius: 1,
             blurRadius: 4,
           ),
@@ -324,7 +336,7 @@ class _TransactionItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             spreadRadius: 1,
             blurRadius: 2,
           ),
@@ -355,7 +367,7 @@ class _TransactionItem extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '$subtitle • $date',
+                  subtitle,
                   style: const TextStyle(fontSize: 12, color: Colors.grey),
                 ),
               ],

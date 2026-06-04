@@ -70,11 +70,11 @@ class SettingsScreen extends StatelessWidget {
                     underline: const SizedBox(),
                     items: const [
                       DropdownMenuItem(
-                        value: AppCurrency.BDT,
+                        value: AppCurrency.bdt,
                         child: Text('BDT (৳)'),
                       ),
                       DropdownMenuItem(
-                        value: AppCurrency.USD,
+                        value: AppCurrency.usd,
                         child: Text('USD (\$)'),
                       ),
                     ],
@@ -233,7 +233,7 @@ class _SettingsSection extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 spreadRadius: 1,
                 blurRadius: 4,
               ),
