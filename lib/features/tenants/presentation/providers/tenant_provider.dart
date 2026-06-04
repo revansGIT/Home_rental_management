@@ -43,6 +43,33 @@ class TenantProvider extends ChangeNotifier {
     return newTenant.id;
   }
 
+  Future<void> updateTenant(
+    String id,
+    String name,
+    String phone,
+    String unitId,
+    DateTime leaseStart,
+    DateTime leaseEnd,
+    double advancePaid,
+    double serviceCharge,
+  ) async {
+    final tenant = _tenantBox.get(id);
+    if (tenant != null) {
+      final updatedTenant = TenantModel(
+        id: tenant.id,
+        name: name,
+        phone: phone,
+        unitId: unitId,
+        leaseStart: leaseStart,
+        leaseEnd: leaseEnd,
+        advancePaid: advancePaid,
+        serviceCharge: serviceCharge,
+      );
+      await _tenantBox.put(id, updatedTenant);
+      notifyListeners();
+    }
+  }
+
   Future<void> removeTenant(String id) async {
     await _tenantBox.delete(id);
     notifyListeners();

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:home_rental_management/core/localization/app_localizations.dart';
 import 'package:home_rental_management/features/properties/presentation/widgets/add_unit_dialog.dart';
 import 'package:home_rental_management/features/properties/presentation/widgets/edit_property_dialog.dart';
+import 'package:home_rental_management/features/properties/presentation/widgets/edit_unit_dialog.dart';
 import 'package:home_rental_management/features/tenants/presentation/providers/tenant_provider.dart';
 import 'package:provider/provider.dart';
 import '../../../../utils/app_provider.dart';
@@ -247,21 +248,55 @@ class PropertyDetailsScreen extends StatelessWidget {
                                 ? tenantProv.getTenant(unit.tenantId!)
                                 : null;
 
-                            return _UnitCard(
-                              unitNumber: unit.unitNumber,
-                              tenant: tenant?.name,
-                              rent: appProvider.formatCurrency(unit.rentAmount),
-                              status: unit.isOccupied
-                                  ? localizations.occupied
-                                  : localizations.vacant,
-                              onTap: () {
-                                if (unit.isOccupied && unit.tenantId != null) {
-                                  context.push('/tenants/${unit.tenantId!}');
-                                }
-                              },
-                            );
-                          },
-                        ),
+                              return _UnitCard(
+                                unitNumber: unit.unitNumber,
+                                tenant: tenant?.name,
+                                rent: appProvider.formatCurrency(unit.rentAmount),
+                                status: unit.isOccupied
+                                    ? localizations.occupied
+                                    : localizations.vacant,
+                                onTap: () {
+                                  if (unit.isOccupied && unit.tenantId != null) {
+                                    context.push('/tenants/${unit.tenantId!}');
+                                  }
+                                },
+                                onEdit: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (_) => EditUnitDialog(unit: unit),
+                                  );
+                                },
+                                onDelete: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (ctx) => AlertDialog(
+                                      title: const Text('Delete Unit'),
+                                      content: const Text('Are you sure you want to delete this unit?'),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.pop(ctx),
+                                          child: const Text('Cancel'),
+                                        ),
+                                        ElevatedButton(
+                                          style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                                          onPressed: () async {
+                                            await propertyProv.deleteUnit(unit.id);
+                                            actProv.logActivity(
+                                              iconCode: 'apartment',
+                                              titleKey: 'Unit Deleted',
+                                              subtitle: 'Unit ${unit.unitNumber} from ${property.name}',
+                                            );
+                                            if (ctx.mounted) Navigator.pop(ctx);
+                                          },
+                                          child: const Text('Delete', style: TextStyle(color: Colors.white)),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                          ),
                 ],
               ),
             ),
@@ -333,6 +368,8 @@ class _UnitCard extends StatelessWidget {
   final String rent;
   final String status;
   final VoidCallback onTap;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
 
   const _UnitCard({
     required this.unitNumber,
@@ -340,6 +377,8 @@ class _UnitCard extends StatelessWidget {
     required this.rent,
     required this.status,
     required this.onTap,
+    required this.onEdit,
+    required this.onDelete,
   });
 
   @override
@@ -403,20 +442,54 @@ class _UnitCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: isOccupied ? Colors.blue[50] : Colors.grey[50],
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    rent,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: isOccupied ? Colors.blue[700] : Colors.grey[600],
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: isOccupied ? Colors.blue[50] : Colors.grey[50],
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        rent,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: isOccupied ? Colors.blue[700] : Colors.grey[600],
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 4),
+                    PopupMenuButton<String>(
+                      icon: const Icon(Icons.more_vert, color: Colors.black54),
+                      onSelected: (value) {
+                        if (value == 'edit') {
+                          onEdit();
+                        } else if (value == 'delete') {
+                          onDelete();
+                        }
+                      },
+                      itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                        const PopupMenuItem<String>(
+                          value: 'edit',
+                          child: ListTile(
+                            leading: Icon(Icons.edit, color: Colors.blue),
+                            title: Text('Edit Unit'),
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
+                        const PopupMenuItem<String>(
+                          value: 'delete',
+                          child: ListTile(
+                            leading: Icon(Icons.delete, color: Colors.red),
+                            title: Text('Delete Unit', style: TextStyle(color: Colors.red)),
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ],
             ),

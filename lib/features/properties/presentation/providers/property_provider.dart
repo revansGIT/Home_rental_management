@@ -89,6 +89,43 @@ class PropertyProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> updateUnit(String unitId, String unitNumber, double rentAmount) async {
+    final unit = _unitBox.get(unitId);
+    if (unit != null) {
+      final updatedUnit = UnitModel(
+        id: unit.id,
+        propertyId: unit.propertyId,
+        unitNumber: unitNumber,
+        rentAmount: rentAmount,
+        tenantId: unit.tenantId,
+      );
+      await _unitBox.put(unitId, updatedUnit);
+      notifyListeners();
+    }
+  }
+
+  Future<void> deleteUnit(String unitId) async {
+    final unit = _unitBox.get(unitId);
+    if (unit != null) {
+      // Update property totalUnits
+      final property = _propertyBox.get(unit.propertyId);
+      if (property != null) {
+        final updatedProperty = PropertyModel(
+          id: property.id,
+          name: property.name,
+          address: property.address,
+          totalUnits: property.totalUnits > 0 ? property.totalUnits - 1 : 0,
+          yearBuilt: property.yearBuilt,
+          imagePath: property.imagePath,
+        );
+        await _propertyBox.put(property.id, updatedProperty);
+      }
+      
+      await _unitBox.delete(unitId);
+      notifyListeners();
+    }
+  }
+
   Future<void> assignTenantToUnit(String unitId, String tenantId) async {
     final unit = _unitBox.get(unitId);
     if (unit != null) {

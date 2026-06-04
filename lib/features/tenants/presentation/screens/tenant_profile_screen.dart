@@ -9,6 +9,8 @@ import '../providers/tenant_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
+import '../../../../core/providers/activity_provider.dart';
+import 'package:home_rental_management/features/tenants/presentation/widgets/edit_tenant_dialog.dart';
 
 class TenantProfileScreen extends StatelessWidget {
   final String tenantId;
@@ -57,9 +59,48 @@ class TenantProfileScreen extends StatelessWidget {
             icon: const Icon(Icons.more_vert, color: Colors.black87),
             onSelected: (value) {
               if (value == 'edit') {
-                // TODO: Implement edit
+                showDialog(
+                  context: context,
+                  builder: (_) => EditTenantDialog(tenant: tenant),
+                );
               } else if (value == 'delete') {
-                // TODO: Implement delete
+                showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text('Delete Tenant'),
+                    content: const Text('Are you sure you want to delete this tenant?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        child: const Text('Cancel'),
+                      ),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                        onPressed: () async {
+                          final propertyProv = context.read<PropertyProvider>();
+                          final actProv = context.read<ActivityProvider>();
+                          
+                          // First remove tenant from their assigned unit
+                          await propertyProv.removeTenantFromUnit(tenant.unitId);
+                          // Delete the tenant
+                          await tenantProv.removeTenant(tenant.id);
+                          
+                          actProv.logActivity(
+                            iconCode: 'person_add',
+                            titleKey: 'Tenant Deleted',
+                            subtitle: tenant.name,
+                          );
+                          
+                          if (ctx.mounted) {
+                            Navigator.pop(ctx);
+                            context.pop(); // Go back to tenant list
+                          }
+                        },
+                        child: const Text('Delete', style: TextStyle(color: Colors.white)),
+                      ),
+                    ],
+                  ),
+                );
               }
             },
             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
