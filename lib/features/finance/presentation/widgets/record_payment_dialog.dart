@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:home_rental_management/features/tenants/presentation/providers/tenant_provider.dart';
 import 'package:provider/provider.dart';
+import '../../../../core/providers/activity_provider.dart';
 import '../providers/finance_provider.dart';
 
 class RecordPaymentDialog extends StatefulWidget {
@@ -124,13 +125,23 @@ class _RecordPaymentDialogState extends State<RecordPaymentDialog> {
                           if (_formKey.currentState!.validate() &&
                               _selectedTenantId != null) {
                             _formKey.currentState!.save();
-                            await context.read<FinanceProvider>().addPayment(
+                            final financeProv = context.read<FinanceProvider>();
+                            final actProv = context.read<ActivityProvider>();
+                            
+                            await financeProv.addPayment(
                                   _selectedTenantId!,
                                   _amount,
                                   DateTime.now(),
                                   _status,
                                   'Rent Payment',
                                 );
+                                
+                            actProv.logActivity(
+                              iconCode: 'payment',
+                              titleKey: 'Payment Recorded',
+                              subtitle: '\$$_amount - $_status',
+                            );
+                            
                             if (context.mounted) Navigator.of(context).pop();
                           }
                         },

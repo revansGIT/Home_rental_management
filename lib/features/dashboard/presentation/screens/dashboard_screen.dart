@@ -8,6 +8,9 @@ import 'package:home_rental_management/features/tenants/presentation/providers/t
 import 'package:home_rental_management/features/tenants/presentation/widgets/add_tenant_dialog.dart';
 import 'package:provider/provider.dart';
 import '../../../../utils/app_provider.dart';
+import '../../../../core/providers/activity_provider.dart';
+import 'recent_activity_screen.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 class DashboardScreen extends StatelessWidget {
   final Function(String) onNavigateToProperty;
@@ -26,6 +29,7 @@ class DashboardScreen extends StatelessWidget {
     final propertyProv = context.watch<PropertyProvider>();
     final tenantProv = context.watch<TenantProvider>();
     final financeProv = context.watch<FinanceProvider>();
+    final activityProv = context.watch<ActivityProvider>();
 
     int totalBuildings = propertyProv.properties.length;
     int totalUnits = propertyProv.units.length;
@@ -235,30 +239,52 @@ class DashboardScreen extends StatelessWidget {
                       fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => RecentActivityScreen(
+                          onBack: () => Navigator.pop(context),
+                        ),
+                      ),
+                    );
+                  },
                   child: Text(localizations.viewAll),
                 ),
               ],
             ),
             const SizedBox(height: 12),
-            _ActivityItem(
-              icon: Icons.payment,
-              title: 'Payment Received',
-              subtitle: 'Flat 3A - ${appProvider.formatCurrency(15000)}',
-              time: '2h ago',
-            ),
-            const _ActivityItem(
-              icon: Icons.person_add,
-              title: 'New Tenant Added',
-              subtitle: 'Building 2 - Unit 5B',
-              time: '5h ago',
-            ),
-            const _ActivityItem(
-              icon: Icons.build,
-              title: 'Maintenance Request',
-              subtitle: 'Building 1 - Unit 2C',
-              time: '1d ago',
-            ),
+            if (activityProv.activities.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 24),
+                child: Center(child: Text('No recent activity')),
+              )
+            else
+              ...activityProv.activities.take(3).map((activity) {
+                IconData icon;
+                switch (activity.iconCode) {
+                  case 'business':
+                    icon = Icons.business;
+                    break;
+                  case 'apartment':
+                    icon = Icons.apartment;
+                    break;
+                  case 'person_add':
+                    icon = Icons.person_add;
+                    break;
+                  case 'payment':
+                    icon = Icons.payment;
+                    break;
+                  default:
+                    icon = Icons.notifications;
+                }
+                return _ActivityItem(
+                  icon: icon,
+                  title: activity.titleKey,
+                  subtitle: activity.subtitle,
+                  time: timeago.format(activity.timestamp),
+                );
+              }),
           ],
         ),
       ),
@@ -299,14 +325,20 @@ class _StatCard extends StatelessWidget {
         children: [
           Icon(icon, color: color, size: 32),
           const SizedBox(height: 8),
-          Text(
-            value,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              value,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
           ),
           const SizedBox(height: 4),
-          Text(
-            title,
-            style: const TextStyle(fontSize: 12, color: Colors.grey),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              title,
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
+            ),
           ),
         ],
       ),
@@ -342,6 +374,8 @@ class _ActionButton extends StatelessWidget {
             Text(
               label,
               textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(fontSize: 10, color: Colors.blue[700]),
             ),
           ],

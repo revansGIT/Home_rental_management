@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../../core/providers/activity_provider.dart';
 import '../providers/property_provider.dart';
 
 class AddPropertyDialog extends StatefulWidget {
@@ -93,7 +94,16 @@ class _AddPropertyDialogState extends State<AddPropertyDialog> {
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
                       _formKey.currentState!.save();
-                      await context.read<PropertyProvider>().addProperty(_name, _address, _yearBuilt);
+                      final propProv = context.read<PropertyProvider>();
+                      final actProv = context.read<ActivityProvider>();
+                      await propProv.addProperty(_name, _address, _yearBuilt);
+                      
+                      actProv.logActivity(
+                        iconCode: 'business',
+                        titleKey: 'New Property Added',
+                        subtitle: _name,
+                      );
+                      
                       if (context.mounted) Navigator.of(context).pop();
                     }
                   },

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:home_rental_management/features/properties/presentation/providers/property_provider.dart';
 import 'package:provider/provider.dart';
+import '../../../../core/providers/activity_provider.dart';
 import '../providers/tenant_provider.dart';
 
 class AddTenantDialog extends StatefulWidget {
@@ -160,6 +161,7 @@ class _AddTenantDialogState extends State<AddTenantDialog> {
                                 _selectedUnitId != null) {
                               _formKey.currentState!.save();
                               final tenantProv = context.read<TenantProvider>();
+                              final actProv = context.read<ActivityProvider>();
 
                               final tId = await tenantProv.addTenant(
                                   _name,
@@ -172,6 +174,12 @@ class _AddTenantDialogState extends State<AddTenantDialog> {
 
                               await propertiesProv.assignTenantToUnit(
                                   _selectedUnitId!, tId);
+
+                              actProv.logActivity(
+                                iconCode: 'person_add',
+                                titleKey: 'New Tenant Added',
+                                subtitle: _name,
+                              );
 
                               if (context.mounted) Navigator.of(context).pop();
                             }

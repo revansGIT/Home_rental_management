@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/property_provider.dart';
+import '../../../../core/providers/activity_provider.dart';
 
 class AddUnitDialog extends StatefulWidget {
   final String propertyId;
@@ -75,9 +76,21 @@ class _AddUnitDialogState extends State<AddUnitDialog> {
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
                       _formKey.currentState!.save();
-                      await context.read<PropertyProvider>().addUnit(
-                        widget.propertyId, _unitNumber, _rentAmount
+                      final propProv = context.read<PropertyProvider>();
+                      final actProv = context.read<ActivityProvider>();
+                      
+                      await propProv.addUnit(
+                        widget.propertyId,
+                        _unitNumber,
+                        _rentAmount,
                       );
+                      
+                      actProv.logActivity(
+                        iconCode: 'apartment',
+                        titleKey: 'New Unit Added',
+                        subtitle: 'Unit $_unitNumber',
+                      );
+                      
                       if (context.mounted) Navigator.of(context).pop();
                     }
                   },
