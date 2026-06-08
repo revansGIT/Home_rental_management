@@ -1,28 +1,56 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:home_rental_management/core/localization/app_localizations.dart';
+import 'package:home_rental_management/core/providers/activity_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
-
-import 'utils/app_provider.dart';
+import 'core/models/property_model.dart';
+import 'core/models/unit_model.dart';
+import 'core/models/tenant_model.dart';
+import 'core/models/payment_model.dart';
+import 'core/models/activity_model.dart';
 import 'features/properties/presentation/providers/property_provider.dart';
 import 'features/tenants/presentation/providers/tenant_provider.dart';
 import 'features/finance/presentation/providers/finance_provider.dart';
+import 'utils/app_provider.dart';
+import 'core/routes/app_router.dart';
+import 'core/services/notification_service.dart';
 
-import 'features/dashboard/presentation/screens/dashboard_screen.dart';
-import 'features/properties/presentation/screens/property_list_screen.dart';
-import 'features/properties/presentation/screens/property_details_screen.dart';
-import 'features/tenants/presentation/screens/tenant_profile_screen.dart';
-import 'features/finance/presentation/screens/financial_reports_screen.dart';
-import 'screens/settings_screen.dart';
-
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+
+  Hive.registerAdapter(PropertyModelAdapter());
+  Hive.registerAdapter(UnitModelAdapter());
+  Hive.registerAdapter(TenantModelAdapter());
+  Hive.registerAdapter(PaymentModelAdapter());
+  Hive.registerAdapter(ActivityModelAdapter());
+
+  await Hive.openBox('settings');
+  await Hive.openBox<PropertyModel>('properties');
+  await Hive.openBox<UnitModel>('units');
+  await Hive.openBox<TenantModel>('tenants');
+  await Hive.openBox<PaymentModel>('payments');
+  await Hive.openBox<ActivityModel>('activities');
+
+  await NotificationService().init();
+
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    NotificationService().requestPermissions();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,10 +60,11 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => PropertyProvider()),
         ChangeNotifierProvider(create: (_) => TenantProvider()),
         ChangeNotifierProvider(create: (_) => FinanceProvider()),
+        ChangeNotifierProvider(create: (_) => ActivityProvider()),
       ],
       child: Consumer<AppProvider>(
         builder: (context, appProvider, _) {
-          return MaterialApp(
+          return MaterialApp.router(
             title: 'Home Rental Management',
             debugShowCheckedModeBanner: false,
             localizationsDelegates: const [
@@ -45,32 +74,26 @@ class MyApp extends StatelessWidget {
               GlobalCupertinoLocalizations.delegate,
             ],
             supportedLocales: const [
-              Locale('en'),
-              Locale('bn'),
+              Locale('en'), // English
+              Locale('bn'), // Bengali
             ],
             locale: appProvider.locale,
+            themeMode: appProvider.themeMode,
             theme: ThemeData(
               colorScheme: ColorScheme.fromSeed(
-                seedColor: const Color(0xFF2563EB), // Vibrant Electric Blue
-                primary: const Color(0xFF2563EB),
-                secondary: const Color(0xFF10B981), // Premium Emerald Green
-                surface: Colors.white,
+                seedColor: Colors.blue,
+                brightness: Brightness.light,
               ),
               useMaterial3: true,
-              textTheme: GoogleFonts.interTextTheme(Theme.of(context).textTheme),
-              appBarTheme: AppBarTheme(
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-                centerTitle: false,
-                titleTextStyle: GoogleFonts.inter(
-                  color: const Color(0xFF1F2937),
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-                iconTheme: const IconThemeData(color: Color(0xFF1F2937)),
-              ),
             ),
-            home: const HomeScreen(),
+            darkTheme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: Colors.blue,
+                brightness: Brightness.dark,
+              ),
+              useMaterial3: true,
+            ),
+            routerConfig: appRouter,
           );
         },
       ),
@@ -78,124 +101,4 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
 
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 0;
-  int? _selectedPropertyId;
-  int? _selectedTenantId;
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-      if (index != 1) _selectedPropertyId = null;
-      if (index != 2) _selectedTenantId = null;
-    });
-  }
-
-  void _navigateToPropertyDetails(int propertyId) {
-    setState(() {
-      _selectedPropertyId = propertyId;
-      _selectedIndex = 1;
-    });
-  }
-
-  void _navigateToTenantProfile(int tenantId) {
-    setState(() {
-      _selectedTenantId = tenantId;
-      _selectedIndex = 2;
-    });
-  }
-
-  void _navigateBack() {
-    setState(() {
-      _selectedPropertyId = null;
-      _selectedTenantId = null;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
-
-    final List<Widget> screens = [
-      DashboardScreen(
-        onNavigateToProperty: _navigateToPropertyDetails,
-        onNavigateToTenant: _navigateToTenantProfile,
-      ),
-      _selectedPropertyId != null
-          ? PropertyDetailsScreen(
-              propertyId: _selectedPropertyId!,
-              onBack: _navigateBack,
-              onViewTenant: _navigateToTenantProfile,
-            )
-          : PropertyListScreen(
-              onSelectProperty: _navigateToPropertyDetails,
-            ),
-      _selectedTenantId != null
-          ? TenantProfileScreen(
-              tenantId: _selectedTenantId!,
-              onBack: _navigateBack,
-            )
-          : TenantProfileScreen(
-              onBack: _navigateBack, // Handles fallback when selected is null
-            ),
-      const FinancialReportsScreen(),
-      const SettingsScreen(),
-    ];
-
-    return Scaffold(
-      body: screens[_selectedIndex],
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.06),
-              blurRadius: 10,
-              spreadRadius: 0,
-            ),
-          ],
-        ),
-        child: NavigationBar(
-          selectedIndex: _selectedIndex,
-          onDestinationSelected: _onItemTapped,
-          backgroundColor: Colors.white,
-          indicatorColor: const Color(0xFF2563EB).withOpacity(0.1),
-          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-          destinations: [
-            NavigationDestination(
-              icon: const Icon(Icons.home_outlined),
-              selectedIcon: const Icon(Icons.home, color: Color(0xFF2563EB)),
-              label: localizations.home,
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.business_outlined),
-              selectedIcon: const Icon(Icons.business, color: Color(0xFF2563EB)),
-              label: localizations.properties,
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.people_outline),
-              selectedIcon: const Icon(Icons.people, color: Color(0xFF2563EB)),
-              label: localizations.tenants,
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.analytics_outlined),
-              selectedIcon: const Icon(Icons.analytics, color: Color(0xFF2563EB)),
-              label: localizations.financial,
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.settings_outlined),
-              selectedIcon: const Icon(Icons.settings, color: Color(0xFF2563EB)),
-              label: localizations.settings,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

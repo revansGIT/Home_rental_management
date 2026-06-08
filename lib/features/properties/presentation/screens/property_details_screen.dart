@@ -1,220 +1,338 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:home_rental_management/core/localization/app_localizations.dart';
+import 'package:home_rental_management/core/services/notification_service.dart';
+import 'package:home_rental_management/features/properties/presentation/widgets/add_unit_dialog.dart';
+import 'package:home_rental_management/features/properties/presentation/widgets/edit_property_dialog.dart';
+import 'package:home_rental_management/features/properties/presentation/widgets/edit_unit_dialog.dart';
+import 'package:home_rental_management/features/tenants/presentation/providers/tenant_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_animate/flutter_animate.dart';
-
 import '../../../../utils/app_provider.dart';
 import '../providers/property_provider.dart';
-import '../../../tenants/presentation/providers/tenant_provider.dart';
-import '../../../../core/widgets/add_forms.dart';
-import '../../data/models/unit_model.dart';
+import '../../../../core/providers/activity_provider.dart';
+import 'package:go_router/go_router.dart';
 
 class PropertyDetailsScreen extends StatelessWidget {
-  final int propertyId;
-  final VoidCallback onBack;
-  final Function(int) onViewTenant;
+  final String propertyId;
 
   const PropertyDetailsScreen({
     super.key,
     required this.propertyId,
-    required this.onBack,
-    required this.onViewTenant,
   });
+
+  void _confirmDelete(BuildContext context, PropertyProvider propertyProv, ActivityProvider actProv, String propertyName) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Property'),
+        content: const Text('Are you sure you want to delete this property? All associated units will also be deleted. This cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () async {
+              await propertyProv.deleteProperty(propertyId);
+              actProv.logActivity(
+                iconCode: 'business',
+                titleKey: 'Property Deleted',
+                subtitle: propertyName,
+              );
+              if (ctx.mounted) {
+                Navigator.pop(ctx); // Close dialog
+                context.pop(); // Go back to list
+              }
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
     final appProvider = Provider.of<AppProvider>(context);
-    final propProvider = Provider.of<PropertyProvider>(context);
-    final tenantProvider = Provider.of<TenantProvider>(context);
+    final propertyProv = context.watch<PropertyProvider>();
+    final tenantProv = context.watch<TenantProvider>();
+    final actProv = context.read<ActivityProvider>();
+    
+    final property = propertyProv.getProperty(propertyId);
+    final units = propertyProv.getUnitsForProperty(propertyId);
 
-    // Safe lookup
-    final propertyList = propProvider.properties.where((p) => p.id == propertyId).toList();
-    if (propertyList.isEmpty) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    if (property == null) {
+      return Scaffold(
+        appBar: AppBar(
+            leading: IconButton(
+                icon: const Icon(Icons.arrow_back), onPressed: () => context.pop())),
+        body: const Center(child: Text('Property not found.')),
+      );
     }
-    final property = propertyList.first;
-    final units = propProvider.getUnitsForProperty(propertyId);
-    final occRate = propProvider.getOccupancyRate(propertyId);
+
+    final occupiedUnits = units.where((u) => u.isOccupied).length;
+    final occupancyRate =
+        units.isEmpty ? 0 : (occupiedUnits / units.length * 100).round();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          onPressed: onBack,
-        ),
-        title: Text(
-          property.name,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, letterSpacing: -0.5),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-            onPressed: () => _showDeleteConfirm(context, propProvider),
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Hero Image/Card
-            Container(
-              height: 180,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF3B82F6), Color(0xFF1E3A8A)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(color: const Color(0xFF3B82F6).withOpacity(0.2), blurRadius: 20, spreadRadius: 0, offset: const Offset(0, 10)),
-                ],
-              ),
-              child: Stack(
-                children: [
-                  Positioned(
-                    right: -20,
-                    bottom: -20,
-                    child: Icon(Icons.business_rounded, size: 180, color: Colors.white.withOpacity(0.1)),
+      backgroundColor: Colors.grey[50],
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 250.0,
+            floating: false,
+            pinned: true,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              color: property.imagePath != null ? Colors.white : Colors.black87,
+              onPressed: () => context.pop(),
+            ),
+            actions: [
+              PopupMenuButton<String>(
+                icon: Icon(Icons.more_vert, color: property.imagePath != null ? Colors.white : Colors.black87),
+                onSelected: (value) {
+                  if (value == 'edit') {
+                    showDialog(
+                      context: context,
+                      builder: (_) => EditPropertyDialog(property: property),
+                    );
+                  } else if (value == 'delete') {
+                    _confirmDelete(context, propertyProv, actProv, property.name);
+                  }
+                },
+                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                  const PopupMenuItem<String>(
+                    value: 'edit',
+                    child: ListTile(
+                      leading: Icon(Icons.edit, color: Colors.blue),
+                      title: Text('Edit Property'),
+                      contentPadding: EdgeInsets.zero,
+                    ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.apartment_rounded, size: 48, color: Colors.white),
-                        const Spacer(),
-                        Text(
-                          property.address,
-                          style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 14, fontWeight: FontWeight.w500),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Occupancy: ${occRate.toStringAsFixed(0)}%',
-                          style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-                        ),
-                      ],
+                  const PopupMenuItem<String>(
+                    value: 'delete',
+                    child: ListTile(
+                      leading: Icon(Icons.delete, color: Colors.red),
+                      title: Text('Delete Property', style: TextStyle(color: Colors.red)),
+                      contentPadding: EdgeInsets.zero,
                     ),
                   ),
                 ],
               ),
-            ).animate().scale(delay: 100.ms, curve: Curves.easeOutBack),
-            const SizedBox(height: 24),
-
-            // Quick Metrics
-            Text(
-              localizations.propertyInformation,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, letterSpacing: -0.3),
-            ),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 12, offset: const Offset(0, 4)),
-                ],
+            ],
+            flexibleSpace: FlexibleSpaceBar(
+              title: Text(
+                property.name,
+                style: TextStyle(
+                  color: property.imagePath != null ? Colors.white : Colors.black87,
+                  fontWeight: FontWeight.bold,
+                  shadows: property.imagePath != null ? [
+                    const Shadow(
+                      offset: Offset(0, 1),
+                      blurRadius: 3.0,
+                      color: Color.fromARGB(255, 0, 0, 0),
+                    ),
+                  ] : null,
+                ),
               ),
+              background: property.imagePath != null
+                  ? Image.file(
+                      File(property.imagePath!),
+                      fit: BoxFit.cover,
+                    )
+                  : Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Colors.blue[100]!, Colors.blue[50]!],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                      ),
+                      child: Center(
+                        child: Icon(Icons.business, size: 80, color: Colors.blue[300]),
+                      ),
+                    ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _DetailsRow(label: localizations.floors, value: appProvider.formatNumber(property.floors)),
-                  const Divider(height: 24),
-                  _DetailsRow(label: localizations.totalSize, value: '${appProvider.formatNumber(property.totalSize.toInt())} sq ft'),
-                  const Divider(height: 24),
-                  _DetailsRow(label: localizations.yearBuilt, value: appProvider.formatNumber(property.yearBuilt)),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        localizations.propertyInformation,
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                      ),
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue[700],
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                        ),
+                        onPressed: () {
+                          showDialog(
+                              context: context,
+                              builder: (_) => AddUnitDialog(propertyId: propertyId));
+                        },
+                        icon: const Icon(Icons.add, size: 18),
+                        label: const Text('Add Unit'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  _InfoCard(
+                    children: [
+                      _InfoRow(
+                        label: localizations.units,
+                        value: appProvider.formatNumber(property.totalUnits),
+                      ),
+                      _InfoRow(
+                        label: 'Address',
+                        value: property.address,
+                      ),
+                      _InfoRow(
+                        label: localizations.yearBuilt,
+                        value: appProvider.formatNumber(property.yearBuilt),
+                      ),
+                      _InfoRow(
+                        label: localizations.occupancyRate,
+                        value: '$occupancyRate%',
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Units Overview
+                  Text(
+                    localizations.unitsOverview,
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                  ),
+                  const SizedBox(height: 12),
+                  units.isEmpty
+                      ? Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 40),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.grey[200]!),
+                          ),
+                          child: Column(
+                            children: [
+                              Icon(Icons.home_work_outlined, size: 48, color: Colors.grey[400]),
+                              const SizedBox(height: 16),
+                              Text(
+                                'No units added yet',
+                                style: TextStyle(color: Colors.grey[600], fontSize: 16, fontWeight: FontWeight.w500),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Click "Add Unit" to get started',
+                                style: TextStyle(color: Colors.grey[400], fontSize: 14),
+                              ),
+                            ],
+                          ),
+                        )
+                      : ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: units.length,
+                          itemBuilder: (context, index) {
+                            final unit = units[index];
+                            final tenant = unit.isOccupied
+                                ? tenantProv.getTenant(unit.tenantId!)
+                                : null;
+
+                              return _UnitCard(
+                                unitNumber: unit.unitNumber,
+                                tenant: tenant?.name,
+                                rent: appProvider.formatCurrency(unit.rentAmount),
+                                status: unit.isOccupied
+                                    ? localizations.occupied
+                                    : localizations.vacant,
+                                onTap: () {
+                                  if (unit.isOccupied && unit.tenantId != null) {
+                                    context.push('/tenants/${unit.tenantId!}');
+                                  }
+                                },
+                                onEdit: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (_) => EditUnitDialog(unit: unit),
+                                  );
+                                },
+                                onNotify: () async {
+                                  final date = await showDatePicker(
+                                    context: context,
+                                    initialDate: DateTime.now(),
+                                    firstDate: DateTime.now(),
+                                    lastDate: DateTime.now().add(const Duration(days: 365)),
+                                  );
+                                  if (date == null || !context.mounted) return;
+                                  
+                                  final time = await showTimePicker(
+                                    context: context,
+                                    initialTime: TimeOfDay.now(),
+                                  );
+                                  if (time == null || !context.mounted) return;
+                                  
+                                  final scheduledDate = DateTime(
+                                    date.year, date.month, date.day, time.hour, time.minute
+                                  );
+                                  
+                                  await NotificationService().scheduleNotification(
+                                    id: unit.id.hashCode,
+                                    title: 'Reminder: Unit ${unit.unitNumber}',
+                                    body: 'Scheduled reminder for Unit ${unit.unitNumber}.',
+                                    scheduledDate: scheduledDate,
+                                  );
+                                  
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Reminder set successfully!')),
+                                    );
+                                  }
+                                },
+                                onDelete: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (ctx) => AlertDialog(
+                                      title: const Text('Delete Unit'),
+                                      content: const Text('Are you sure you want to delete this unit?'),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.pop(ctx),
+                                          child: const Text('Cancel'),
+                                        ),
+                                        ElevatedButton(
+                                          style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                                          onPressed: () async {
+                                            await propertyProv.deleteUnit(unit.id);
+                                            actProv.logActivity(
+                                              iconCode: 'apartment',
+                                              titleKey: 'Unit Deleted',
+                                              subtitle: 'Unit ${unit.unitNumber} from ${property.name}',
+                                            );
+                                            if (ctx.mounted) Navigator.pop(ctx);
+                                          },
+                                          child: const Text('Delete', style: TextStyle(color: Colors.white)),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                          ),
                 ],
               ),
-            ).animate().fade(delay: 200.ms).slideY(begin: 0.05),
-            const SizedBox(height: 28),
-
-            // Units Header & Add Button
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  localizations.unitsOverview,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, letterSpacing: -0.3),
-                ),
-                TextButton.icon(
-                  icon: const Icon(Icons.add, size: 18),
-                  label: const Text('Add Unit', style: TextStyle(fontWeight: FontWeight.bold)),
-                  onPressed: () => AddUnitModal.show(context, propertyId),
-                ),
-              ],
             ),
-            const SizedBox(height: 8),
-
-            // Units Listing
-            if (units.isEmpty)
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 32),
-                  child: Text('No units added to this building yet.', style: TextStyle(color: Colors.grey[400])),
-                ),
-              )
-            else
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: units.length,
-                itemBuilder: (context, idx) {
-                  final unit = units[idx];
-                  final isOccupied = unit.status == UnitStatus.occupied;
-                  // If occupied, lookup resident
-                  final linkedTenant = isOccupied
-                      ? tenantProvider.tenantDetails.firstWhere(
-                          (td) => td.tenant.unitId == unit.id,
-                          orElse: () => TenantDetails(
-                              tenant: null as dynamic,
-                              propertyName: '',
-                              unitName: '')) // will fail gracefully or just empty
-                      : null;
-
-                  return _UnitCard(
-                    unitNumber: unit.unitNumber,
-                    tenantName: isOccupied ? (linkedTenant?.tenant.name ?? 'Active Tenant') : null,
-                    rentAmount: appProvider.formatCurrency(unit.rentAmount),
-                    isOccupied: isOccupied,
-                    onTap: () {
-                      if (isOccupied && linkedTenant != null && linkedTenant.tenant != null) {
-                        onViewTenant(linkedTenant.tenant.id!);
-                      }
-                    },
-                  ).animate().fade(delay: (250 + idx * 80).ms).slideX(begin: 0.05);
-                },
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showDeleteConfirm(BuildContext context, PropertyProvider provider) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Delete Property?'),
-        content: const Text('Are you sure? All attached Units, Tenants, and Records will be permanently erased.'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(ctx); // close dialog
-              await provider.deleteProperty(propertyId);
-              onBack(); // return to list
-            },
-            child: const Text('Delete', style: TextStyle(color: Colors.redAccent)),
           ),
         ],
       ),
@@ -222,41 +340,85 @@ class PropertyDetailsScreen extends StatelessWidget {
   }
 }
 
-class _DetailsRow extends StatelessWidget {
-  final String label;
-  final String value;
-  const _DetailsRow({required this.label, required this.value});
+class _InfoCard extends StatelessWidget {
+  final List<Widget> children;
+
+  const _InfoCard({required this.children});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey[500])),
-        Text(value, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Color(0xFF1F2937))),
-      ],
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.08),
+            spreadRadius: 2,
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(children: children),
+    );
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _InfoRow({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 15)),
+          Expanded(
+            child: Text(
+              value, 
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: Colors.black87),
+              textAlign: TextAlign.right,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
 class _UnitCard extends StatelessWidget {
   final String unitNumber;
-  final String? tenantName;
-  final String rentAmount;
-  final bool isOccupied;
+  final String? tenant;
+  final String rent;
+  final String status;
   final VoidCallback onTap;
+  final VoidCallback onEdit;
+  final VoidCallback onNotify;
+  final VoidCallback onDelete;
 
   const _UnitCard({
     required this.unitNumber,
-    required this.tenantName,
-    required this.rentAmount,
-    required this.isOccupied,
+    this.tenant,
+    required this.rent,
+    required this.status,
     required this.onTap,
+    required this.onEdit,
+    required this.onNotify,
+    required this.onDelete,
   });
 
   @override
   Widget build(BuildContext context) {
-    final Color color = isOccupied ? const Color(0xFF10B981) : const Color(0xFF9CA3AF);
+    final isOccupied = tenant != null;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -264,22 +426,38 @@ class _UnitCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 8, offset: const Offset(0, 2)),
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.05),
+            spreadRadius: 1,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
         ],
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(16),
           onTap: isOccupied ? onTap : null,
+          borderRadius: BorderRadius.circular(16),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
-                  child: Icon(isOccupied ? Icons.door_back_door : Icons.door_back_door_outlined, color: color),
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: isOccupied ? Colors.green[50] : Colors.grey[100],
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isOccupied ? Colors.green[200]! : Colors.grey[200]!,
+                    )
+                  ),
+                  child: Icon(
+                    isOccupied ? Icons.home : Icons.home_outlined,
+                    color: isOccupied ? Colors.green[700] : Colors.grey[500],
+                    size: 26,
+                  ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -288,23 +466,74 @@ class _UnitCard extends StatelessWidget {
                     children: [
                       Text(
                         'Unit $unitNumber',
-                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, letterSpacing: -0.2),
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: 4),
                       Text(
-                        isOccupied ? 'Leased to: $tenantName' : 'Vacant',
-                        style: TextStyle(fontSize: 12, color: isOccupied ? Colors.grey[600] : Colors.grey[400], fontWeight: FontWeight.w500),
+                        tenant ?? status,
+                        style: TextStyle(fontSize: 14, color: isOccupied ? Colors.black54 : Colors.grey[500]),
                       ),
                     ],
                   ),
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(rentAmount, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: color)),
-                    const SizedBox(height: 2),
-                    if (isOccupied)
-                      Text('Tap to view Profile', style: TextStyle(fontSize: 10, color: Colors.grey[400], fontWeight: FontWeight.w600))
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: isOccupied ? Colors.blue[50] : Colors.grey[50],
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        rent,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: isOccupied ? Colors.blue[700] : Colors.grey[600],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    PopupMenuButton<String>(
+                      icon: const Icon(Icons.more_vert, color: Colors.black54),
+                      onSelected: (value) {
+                        if (value == 'edit') {
+                          onEdit();
+                        } else if (value == 'notify') {
+                          onNotify();
+                        } else if (value == 'delete') {
+                          onDelete();
+                        }
+                      },
+                      itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                        const PopupMenuItem<String>(
+                          value: 'edit',
+                          child: ListTile(
+                            leading: Icon(Icons.edit, color: Colors.blue),
+                            title: Text('Edit Unit'),
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
+                        const PopupMenuItem<String>(
+                          value: 'notify',
+                          child: ListTile(
+                            leading: Icon(Icons.notification_add, color: Colors.orange),
+                            title: Text('Set Reminder'),
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
+                        const PopupMenuItem<String>(
+                          value: 'delete',
+                          child: ListTile(
+                            leading: Icon(Icons.delete, color: Colors.red),
+                            title: Text('Delete Unit', style: TextStyle(color: Colors.red)),
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ],

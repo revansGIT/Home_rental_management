@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:home_rental_management/core/localization/app_localizations.dart';
+import '../../../core/widgets/custom_app_bar.dart';
 
 import 'package:provider/provider.dart';
-import '../utils/app_provider.dart';
+import '../../utils/app_provider.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -13,14 +14,10 @@ class SettingsScreen extends StatelessWidget {
     final appProvider = Provider.of<AppProvider>(context);
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text(
-          localizations.appSettings,
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      appBar: CustomAppBar(
+        title: localizations.settings,
+        showBackButton: false,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -70,11 +67,11 @@ class SettingsScreen extends StatelessWidget {
                     underline: const SizedBox(),
                     items: const [
                       DropdownMenuItem(
-                        value: AppCurrency.BDT,
+                        value: AppCurrency.bdt,
                         child: Text('BDT (৳)'),
                       ),
                       DropdownMenuItem(
-                        value: AppCurrency.USD,
+                        value: AppCurrency.usd,
                         child: Text('USD (\$)'),
                       ),
                     ],
@@ -98,8 +95,10 @@ class SettingsScreen extends StatelessWidget {
                   title: localizations.notifications,
                   subtitle: localizations.notificationDesc,
                   trailing: Switch(
-                    value: true,
-                    onChanged: (value) {},
+                    value: appProvider.notificationsEnabled,
+                    onChanged: (value) {
+                      appProvider.setNotificationsEnabled(value);
+                    },
                   ),
                 ),
               ],
@@ -115,8 +114,10 @@ class SettingsScreen extends StatelessWidget {
                   title: localizations.darkMode,
                   subtitle: localizations.enableDarkTheme,
                   trailing: Switch(
-                    value: false,
-                    onChanged: (value) {},
+                    value: appProvider.themeMode == ThemeMode.dark,
+                    onChanged: (value) {
+                      appProvider.setThemeMode(value ? ThemeMode.dark : ThemeMode.light);
+                    },
                   ),
                 ),
               ],
@@ -223,21 +224,17 @@ class _SettingsSection extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Colors.grey[700],
+              color: Theme.of(context).colorScheme.primary,
             ),
           ),
         ),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
-                spreadRadius: 1,
-                blurRadius: 4,
-              ),
-            ],
+            color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5),
+            ),
           ),
           child: Column(children: children),
         ),
@@ -267,10 +264,10 @@ class _SettingsTile extends StatelessWidget {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: Colors.blue[50],
-          borderRadius: BorderRadius.circular(8),
+          color: Theme.of(context).colorScheme.primaryContainer,
+          borderRadius: BorderRadius.circular(10),
         ),
-        child: Icon(icon, color: Colors.blue[700], size: 24),
+        child: Icon(icon, color: Theme.of(context).colorScheme.onPrimaryContainer, size: 22),
       ),
       title: Text(
         title,
@@ -279,11 +276,11 @@ class _SettingsTile extends StatelessWidget {
       subtitle: subtitle != null
           ? Text(
               subtitle!,
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
+              style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
             )
           : null,
       trailing:
-          trailing ?? (onTap != null ? const Icon(Icons.chevron_right) : null),
+          trailing ?? (onTap != null ? Icon(Icons.chevron_right, color: Theme.of(context).colorScheme.onSurfaceVariant) : null),
       onTap: onTap,
     );
   }

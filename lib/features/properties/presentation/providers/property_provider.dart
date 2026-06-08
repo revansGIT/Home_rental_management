@@ -1,75 +1,158 @@
 import 'package:flutter/material.dart';
-import '../../../../core/services/database_helper.dart';
-import '../../data/models/property_model.dart';
-import '../../data/models/unit_model.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:uuid/uuid.dart';
+import '../../../../core/models/property_model.dart';
+import '../../../../core/models/unit_model.dart';
 
 class PropertyProvider extends ChangeNotifier {
-  final _db = DatabaseHelper.instance;
+  final Box<PropertyModel> _propertyBox = Hive.box<PropertyModel>('properties');
+  final Box<UnitModel> _unitBox = Hive.box<UnitModel>('units');
+  final _uuid = const Uuid();
 
-  List<PropertyModel> _properties = [];
-  List<UnitModel> _allUnits = [];
-  bool _isLoading = false;
+  List<PropertyModel> get properties => _propertyBox.values.toList();
+  List<UnitModel> get units => _unitBox.values.toList();
 
-  List<PropertyModel> get properties => _properties;
-  List<UnitModel> get allUnits => _allUnits;
-  bool get isLoading => _isLoading;
+  PropertyModel? getProperty(String id) => _propertyBox.get(id);
 
-  PropertyProvider() {
-    refreshData();
+  List<UnitModel> getUnitsForProperty(String propertyId) {
+    return _unitBox.values.where((unit) => unit.propertyId == propertyId).toList();
   }
 
-  Future<void> refreshData() async {
-    _isLoading = true;
-    notifyListeners();
-
-    try {
-      final propMaps = await _db.queryAll('properties');
-      _properties = propMaps.map((map) => PropertyModel.fromMap(map)).toList();
-
-      final unitMaps = await _db.queryAll('units');
-      _allUnits = unitMaps.map((map) => UnitModel.fromMap(map)).toList();
-    } catch (e) {
-      debugPrint('Error fetching properties: $e');
-    }
-
-    _isLoading = false;
+  Future<void> addProperty(String name, String address, int yearBuilt) async {
+    final newProperty = PropertyModel(
+      id: _uuid.v4(),
+      name: name,
+      address: address,
+      totalUnits: 0,
+      yearBuilt: yearBuilt,
+      imagePath: null,
+    );
+    await _propertyBox.put(newProperty.id, newProperty);
     notifyListeners();
   }
 
-  List<UnitModel> getUnitsForProperty(int propertyId) {
-    return _allUnits.where((unit) => unit.propertyId == propertyId).toList();
-  }
-
-  double getOccupancyRate(int propertyId) {
-    final propUnits = getUnitsForProperty(propertyId);
-    if (propUnits.isEmpty) return 0.0;
-    final occupied = propUnits.where((u) => u.status == UnitStatus.occupied).length;
-    return (occupied / propUnits.length) * 100.0;
-  }
-
-  Future<int> addProperty(PropertyModel property) async {
-    final id = await _db.insert('properties', property.toMap());
-    await refreshData();
-    return id;
-  }
-
-  Future<void> addUnit(UnitModel unit) async {
-    await _db.insert('units', unit.toMap());
-    await refreshData();
-  }
-
-  Future<void> updateUnitStatus(int unitId, UnitStatus status) async {
-    final unitIndex = _allUnits.indexWhere((u) => u.id == unitId);
-    if (unitIndex != -1) {
-      final updatedUnit = _allUnits[unitIndex].copyWith(status: status);
-      await _db.update('units', updatedUnit.toMap(), 'id');
-      await refreshData();
+  Future<void> updateProperty(
+    String id,
+    String name,
+    String address,
+    int yearBuilt,
+    String? imagePath,
+  ) async {
+    final property = _propertyBox.get(id);
+    if (property != null) {
+      final updatedProperty = PropertyModel(
+        id: property.id,
+        name: name,
+        address: address,
+        totalUnits: property.totalUnits,
+        yearBuilt: yearBuilt,
+        imagePath: imagePath,
+      );
+      await _propertyBox.put(id, updatedProperty);
+      notifyListeners();
     }
   }
 
-  Future<void> deleteProperty(int id) async {
-    await _db.delete('properties', 'id', id);
-    // SQL ON DELETE CASCADE will handle Units, but let's refresh state
-    await refreshData();
+  Future<void> deleteProperty(String id) async {
+    // Delete associated units first
+    final unitsToDelete = _unitBox.values.where((u) => u.propertyId == id).toList();
+    for (var unit in unitsToDelete) {
+      await _unitBox.delete(unit.id);
+    }
+    // Delete property
+    await _propertyBox.delete(id);
+    notifyListeners();
+  }
+
+  Future<void> addUnit(String propertyId, String unitNumber, double rentAmount) async {
+    final newUnit = UnitModel(
+      id: _uuid.v4(),
+      propertyId: propertyId,
+      unitNumber: unitNumber,
+      rentAmount: rentAmount,
+    );
+    await _unitBox.put(newUnit.id, newUnit);
+    
+    // Update property totalUnits
+    final property = _propertyBox.get(propertyId);
+    if (property != null) {
+      final updatedProperty = PropertyModel(
+        id: property.id,
+        name: property.name,
+        address: property.address,
+        totalUnits: property.totalUnits + 1,
+        yearBuilt: property.yearBuilt,
+        imagePath: property.imagePath,
+      );
+      await _propertyBox.put(property.id, updatedProperty);
+    }
+    notifyListeners();
+  }
+
+  Future<void> updateUnit(String unitId, String unitNumber, double rentAmount) async {
+    final unit = _unitBox.get(unitId);
+    if (unit != null) {
+      final updatedUnit = UnitModel(
+        id: unit.id,
+        propertyId: unit.propertyId,
+        unitNumber: unitNumber,
+        rentAmount: rentAmount,
+        tenantId: unit.tenantId,
+      );
+      await _unitBox.put(unitId, updatedUnit);
+      notifyListeners();
+    }
+  }
+
+  Future<void> deleteUnit(String unitId) async {
+    final unit = _unitBox.get(unitId);
+    if (unit != null) {
+      // Update property totalUnits
+      final property = _propertyBox.get(unit.propertyId);
+      if (property != null) {
+        final updatedProperty = PropertyModel(
+          id: property.id,
+          name: property.name,
+          address: property.address,
+          totalUnits: property.totalUnits > 0 ? property.totalUnits - 1 : 0,
+          yearBuilt: property.yearBuilt,
+          imagePath: property.imagePath,
+        );
+        await _propertyBox.put(property.id, updatedProperty);
+      }
+      
+      await _unitBox.delete(unitId);
+      notifyListeners();
+    }
+  }
+
+  Future<void> assignTenantToUnit(String unitId, String tenantId) async {
+    final unit = _unitBox.get(unitId);
+    if (unit != null) {
+      final updatedUnit = UnitModel(
+        id: unit.id,
+        propertyId: unit.propertyId,
+        unitNumber: unit.unitNumber,
+        rentAmount: unit.rentAmount,
+        tenantId: tenantId,
+      );
+      await _unitBox.put(unitId, updatedUnit);
+      notifyListeners();
+    }
+  }
+
+  Future<void> removeTenantFromUnit(String unitId) async {
+    final unit = _unitBox.get(unitId);
+    if (unit != null) {
+      final updatedUnit = UnitModel(
+        id: unit.id,
+        propertyId: unit.propertyId,
+        unitNumber: unit.unitNumber,
+        rentAmount: unit.rentAmount,
+        tenantId: null,
+      );
+      await _unitBox.put(unitId, updatedUnit);
+      notifyListeners();
+    }
   }
 }
