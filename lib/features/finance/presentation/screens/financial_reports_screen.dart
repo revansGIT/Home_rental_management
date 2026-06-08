@@ -4,10 +4,57 @@ import 'package:provider/provider.dart';
 import '../../../../utils/app_provider.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
 import '../providers/finance_provider.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
+import 'dart:io';
+import 'package:csv/csv.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
+import '../../../../core/models/payment_model.dart';
+import '../widgets/record_payment_dialog.dart';
 
 class FinancialReportsScreen extends StatelessWidget {
   const FinancialReportsScreen({super.key});
+
+  Future<void> _exportToCsv(BuildContext context, List<PaymentModel> payments, AppProvider appProvider) async {
+    try {
+      List<List<dynamic>> rows = [];
+      // Header row
+      rows.add(["Date", "Description", "Amount", "Status", "Tenant ID"]);
+
+      // Data rows
+      for (var payment in payments) {
+        rows.add([
+          DateFormat('yyyy-MM-dd').format(payment.date),
+          payment.description,
+          appProvider.formatCurrency(payment.amount),
+          payment.status,
+          payment.tenantId,
+        ]);
+      }
+
+      String csvData = ListToCsvConverter().convert(rows);
+
+      final directory = await getApplicationDocumentsDirectory();
+      final path = '${directory.path}/financial_report.csv';
+      final file = File(path);
+      await file.writeAsString(csvData);
+
+      if (context.mounted) {
+        final box = context.findRenderObject() as RenderBox?;
+        await Share.shareXFiles([XFile(path)], 
+          subject: 'Financial Report', 
+          sharePositionOrigin: box!.localToGlobal(Offset.zero) & box.size
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to export: $e')),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,10 +80,10 @@ class FinancialReportsScreen extends StatelessWidget {
             icon: Icon(Icons.payment, color: Colors.blue[700], size: 20),
             tooltip: 'Record Payment', 
             onPressed: () {
-              // showDialog(
-              //   context: context,
-              //   builder: (_) => const RecordPaymentDialog(),
-              // );
+              showDialog(
+                context: context,
+                builder: (_) => const RecordPaymentDialog(),
+              );
             },
           ),
         ],
@@ -112,6 +159,39 @@ class FinancialReportsScreen extends StatelessWidget {
               ),
               child: Column(
                 children: [
+                  SizedBox(
+                    height: 200,
+                    child: PieChart(
+                      PieChartData(
+                        sectionsSpace: 2,
+                        centerSpaceRadius: 40,
+                        sections: [
+                          PieChartSectionData(
+                            color: Colors.blue,
+                            value: 44,
+                            title: '44%',
+                            radius: 50,
+                            titleStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                          ),
+                          PieChartSectionData(
+                            color: Colors.orange,
+                            value: 33,
+                            title: '33%',
+                            radius: 50,
+                            titleStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                          ),
+                          PieChartSectionData(
+                            color: Colors.purple,
+                            value: 23,
+                            title: '23%',
+                            radius: 50,
+                            titleStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   _ExpenseItem(
                     label: 'Maintenance',
                     amount: appProvider.formatCurrency(20000),
@@ -167,7 +247,7 @@ class FinancialReportsScreen extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () {},
+                onPressed: () => _exportToCsv(context, payments, appProvider),
                 icon: const Icon(Icons.download),
                 label: Text(localizations.exportReports),
                 style: ElevatedButton.styleFrom(

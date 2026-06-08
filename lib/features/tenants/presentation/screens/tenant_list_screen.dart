@@ -6,14 +6,25 @@ import '../../../../core/widgets/custom_app_bar.dart';
 import '../providers/tenant_provider.dart';
 import '../widgets/add_tenant_dialog.dart';
 
-class TenantListScreen extends StatelessWidget {
+class TenantListScreen extends StatefulWidget {
   const TenantListScreen({super.key});
+
+  @override
+  State<TenantListScreen> createState() => _TenantListScreenState();
+}
+
+class _TenantListScreenState extends State<TenantListScreen> {
+  String _searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
     final tenantProv = context.watch<TenantProvider>();
-    final tenants = tenantProv.tenants;
+    final tenants = tenantProv.tenants.where((t) {
+      if (_searchQuery.isEmpty) return true;
+      return t.name.toLowerCase().contains(_searchQuery.toLowerCase()) || 
+             t.phone.contains(_searchQuery);
+    }).toList();
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
@@ -37,27 +48,49 @@ class TenantListScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: tenants.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.people_outline, size: 80, color: Colors.grey[300]),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No tenants found',
-                    style: TextStyle(fontSize: 18, color: Colors.grey[600], fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Click + to add your first tenant',
-                    style: TextStyle(fontSize: 14, color: Colors.grey[400]),
-                  ),
-                ],
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: 'Search tenants...',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                filled: true,
+                fillColor: Colors.white,
               ),
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.only(top: 8, bottom: 24, left: 16, right: 16),
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value;
+                });
+              },
+            ),
+          ),
+          Expanded(
+            child: tenants.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.people_outline, size: 80, color: Colors.grey[300]),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No tenants found',
+                          style: TextStyle(fontSize: 18, color: Colors.grey[600], fontWeight: FontWeight.w600),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Click + to add your first tenant',
+                          style: TextStyle(fontSize: 14, color: Colors.grey[400]),
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.only(top: 8, bottom: 24, left: 16, right: 16),
               itemCount: tenants.length,
               itemBuilder: (context, index) {
                 final tenant = tenants[index];
@@ -90,6 +123,9 @@ class TenantListScreen extends StatelessWidget {
                 );
               },
             ),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           showDialog(

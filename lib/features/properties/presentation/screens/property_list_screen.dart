@@ -7,15 +7,26 @@ import '../widgets/add_property_dialog.dart';
 import '../../../../utils/app_provider.dart';
 import '../../../../core/widgets/custom_app_bar.dart';
 
-class PropertyListScreen extends StatelessWidget {
+class PropertyListScreen extends StatefulWidget {
   const PropertyListScreen({super.key});
+
+  @override
+  State<PropertyListScreen> createState() => _PropertyListScreenState();
+}
+
+class _PropertyListScreenState extends State<PropertyListScreen> {
+  String _searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
     final propertyProv = context.watch<PropertyProvider>();
     final appProvider = context.watch<AppProvider>();
-    final properties = propertyProv.properties;
+    final properties = propertyProv.properties.where((p) {
+      if (_searchQuery.isEmpty) return true;
+      return p.name.toLowerCase().contains(_searchQuery.toLowerCase()) || 
+             p.address.toLowerCase().contains(_searchQuery.toLowerCase());
+    }).toList();
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
@@ -57,6 +68,11 @@ class PropertyListScreen extends StatelessWidget {
                 fillColor: Colors.white,
                 contentPadding: const EdgeInsets.symmetric(vertical: 0),
               ),
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value;
+                });
+              },
             ),
           ),
           Expanded(
