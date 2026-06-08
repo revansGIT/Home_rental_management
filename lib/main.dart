@@ -2,7 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:home_rental_management/core/localization/app_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 import 'utils/app_provider.dart';
+import 'features/properties/presentation/providers/property_provider.dart';
+import 'features/tenants/presentation/providers/tenant_provider.dart';
+import 'features/finance/presentation/providers/finance_provider.dart';
+
 import 'features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'features/properties/presentation/screens/property_list_screen.dart';
 import 'features/properties/presentation/screens/property_details_screen.dart';
@@ -11,6 +17,7 @@ import 'features/finance/presentation/screens/financial_reports_screen.dart';
 import 'screens/settings_screen.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -19,8 +26,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => AppProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AppProvider()),
+        ChangeNotifierProvider(create: (_) => PropertyProvider()),
+        ChangeNotifierProvider(create: (_) => TenantProvider()),
+        ChangeNotifierProvider(create: (_) => FinanceProvider()),
+      ],
       child: Consumer<AppProvider>(
         builder: (context, appProvider, _) {
           return MaterialApp(
@@ -33,13 +45,30 @@ class MyApp extends StatelessWidget {
               GlobalCupertinoLocalizations.delegate,
             ],
             supportedLocales: const [
-              Locale('en'), // English
-              Locale('bn'), // Bengali
+              Locale('en'),
+              Locale('bn'),
             ],
             locale: appProvider.locale,
             theme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: const Color(0xFF2563EB), // Vibrant Electric Blue
+                primary: const Color(0xFF2563EB),
+                secondary: const Color(0xFF10B981), // Premium Emerald Green
+                surface: Colors.white,
+              ),
               useMaterial3: true,
+              textTheme: GoogleFonts.interTextTheme(Theme.of(context).textTheme),
+              appBarTheme: AppBarTheme(
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                centerTitle: false,
+                titleTextStyle: GoogleFonts.inter(
+                  color: const Color(0xFF1F2937),
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+                iconTheme: const IconThemeData(color: Color(0xFF1F2937)),
+              ),
             ),
             home: const HomeScreen(),
           );
@@ -58,26 +87,25 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
-  String? _selectedPropertyId;
-  String? _selectedTenantId;
+  int? _selectedPropertyId;
+  int? _selectedTenantId;
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
-      // Reset selections when changing tabs
       if (index != 1) _selectedPropertyId = null;
       if (index != 2) _selectedTenantId = null;
     });
   }
 
-  void _navigateToPropertyDetails(String propertyId) {
+  void _navigateToPropertyDetails(int propertyId) {
     setState(() {
       _selectedPropertyId = propertyId;
       _selectedIndex = 1;
     });
   }
 
-  void _navigateToTenantProfile(String tenantId) {
+  void _navigateToTenantProfile(int tenantId) {
     setState(() {
       _selectedTenantId = tenantId;
       _selectedIndex = 2;
@@ -114,41 +142,59 @@ class _HomeScreenState extends State<HomeScreen> {
               tenantId: _selectedTenantId!,
               onBack: _navigateBack,
             )
-          : const Center(child: Text('Select a tenant')),
+          : TenantProfileScreen(
+              onBack: _navigateBack, // Handles fallback when selected is null
+            ),
       const FinancialReportsScreen(),
       const SettingsScreen(),
     ];
 
     return Scaffold(
       body: screens[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        selectedItemColor: Colors.blue[600],
-        unselectedItemColor: Colors.grey[500],
-        items: [
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.home),
-            label: localizations.home,
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.business),
-            label: localizations.properties,
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.people),
-            label: localizations.tenants,
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.attach_money),
-            label: localizations.financial,
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.settings),
-            label: localizations.settings,
-          ),
-        ],
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 10,
+              spreadRadius: 0,
+            ),
+          ],
+        ),
+        child: NavigationBar(
+          selectedIndex: _selectedIndex,
+          onDestinationSelected: _onItemTapped,
+          backgroundColor: Colors.white,
+          indicatorColor: const Color(0xFF2563EB).withOpacity(0.1),
+          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+          destinations: [
+            NavigationDestination(
+              icon: const Icon(Icons.home_outlined),
+              selectedIcon: const Icon(Icons.home, color: Color(0xFF2563EB)),
+              label: localizations.home,
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.business_outlined),
+              selectedIcon: const Icon(Icons.business, color: Color(0xFF2563EB)),
+              label: localizations.properties,
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.people_outline),
+              selectedIcon: const Icon(Icons.people, color: Color(0xFF2563EB)),
+              label: localizations.tenants,
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.analytics_outlined),
+              selectedIcon: const Icon(Icons.analytics, color: Color(0xFF2563EB)),
+              label: localizations.financial,
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.settings_outlined),
+              selectedIcon: const Icon(Icons.settings, color: Color(0xFF2563EB)),
+              label: localizations.settings,
+            ),
+          ],
+        ),
       ),
     );
   }
