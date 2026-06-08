@@ -49,7 +49,7 @@ The app supports two languages:
 - English (en)
 - Bengali (bn)
 
-Localization files are located in `lib/l10n/`:
+Localization files are located in `lib/core/localization/`:
 - `app_en.arb` - English translations
 - `app_bn.arb` - Bengali translations
 
@@ -57,19 +57,15 @@ Localization files are located in `lib/l10n/`:
 
 ```
 lib/
-├── main.dart                 # App entry point
-├── screens/                  # UI screens
-│   ├── dashboard_screen.dart
-│   ├── property_list_screen.dart
-│   ├── property_details_screen.dart
-│   ├── tenant_profile_screen.dart
-│   ├── financial_reports_screen.dart
-│   └── settings_screen.dart
-├── utils/                    # Utilities
-│   └── app_provider.dart    # State management
-└── l10n/                     # Localization files
-    ├── app_en.arb
-    └── app_bn.arb
+├── core/                     # Core models, routes, localization, services
+├── features/                 # Feature-based UI architecture
+│   ├── dashboard/
+│   ├── finance/
+│   ├── properties/
+│   ├── settings/
+│   └── tenants/
+├── utils/                    # Utilities and AppProvider
+└── main.dart                 # App entry point
 ```
 
 ## Design

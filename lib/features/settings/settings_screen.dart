@@ -105,24 +105,7 @@ class SettingsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Appearance
-            _SettingsSection(
-              title: 'Appearance',
-              children: [
-                _SettingsTile(
-                  icon: Icons.dark_mode,
-                  title: localizations.darkMode,
-                  subtitle: localizations.enableDarkTheme,
-                  trailing: Switch(
-                    value: appProvider.themeMode == ThemeMode.dark,
-                    onChanged: (value) {
-                      appProvider.setThemeMode(value ? ThemeMode.dark : ThemeMode.light);
-                    },
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
+
 
             // Data & Security
             _SettingsSection(

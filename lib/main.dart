@@ -78,7 +78,7 @@ class _MyAppState extends State<MyApp> {
               Locale('bn'), // Bengali
             ],
             locale: appProvider.locale,
-            themeMode: appProvider.themeMode,
+
             theme: ThemeData(
               colorScheme: ColorScheme.fromSeed(
                 seedColor: Colors.blue,
@@ -86,13 +86,7 @@ class _MyAppState extends State<MyApp> {
               ),
               useMaterial3: true,
             ),
-            darkTheme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(
-                seedColor: Colors.blue,
-                brightness: Brightness.dark,
-              ),
-              useMaterial3: true,
-            ),
+
             routerConfig: appRouter,
           );
         },

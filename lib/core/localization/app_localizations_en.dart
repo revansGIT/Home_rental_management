@@ -252,12 +252,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notificationDesc => 'Payment & lease reminders';
 
   @override
-  String get darkMode => 'Dark Mode';
-
-  @override
-  String get enableDarkTheme => 'Enable dark theme';
-
-  @override
   String get dataSecurity => 'Data & Security';
 
   @override

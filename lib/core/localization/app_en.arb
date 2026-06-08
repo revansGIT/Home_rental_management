@@ -81,8 +81,7 @@
   "displayLanguage": "App display language",
   "notifications": "Notifications",
   "notificationDesc": "Payment & lease reminders",
-  "darkMode": "Dark Mode",
-  "enableDarkTheme": "Enable dark theme",
+
   "dataSecurity": "Data & Security",
   "backupRestore": "Backup & Restore",
   "backupDesc": "Save and restore your data",

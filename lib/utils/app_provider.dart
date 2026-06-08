@@ -8,7 +8,7 @@ class AppProvider extends ChangeNotifier {
 
   Locale _locale = const Locale('bn');
   AppCurrency _currency = AppCurrency.bdt;
-  ThemeMode _themeMode = ThemeMode.system;
+
   bool _notificationsEnabled = true;
 
   AppProvider() {
@@ -25,18 +25,14 @@ class AppProvider extends ChangeNotifier {
       orElse: () => AppCurrency.bdt,
     );
     
-    final themeStr = _settingsBox.get('themeMode', defaultValue: 'system');
-    _themeMode = ThemeMode.values.firstWhere(
-      (e) => e.name == themeStr,
-      orElse: () => ThemeMode.system,
-    );
+
     
     _notificationsEnabled = _settingsBox.get('notificationsEnabled', defaultValue: true);
   }
 
   Locale get locale => _locale;
   AppCurrency get currency => _currency;
-  ThemeMode get themeMode => _themeMode;
+
   bool get notificationsEnabled => _notificationsEnabled;
 
   void setLocale(Locale locale) {
@@ -51,11 +47,7 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setThemeMode(ThemeMode mode) {
-    _themeMode = mode;
-    _settingsBox.put('themeMode', mode.name);
-    notifyListeners();
-  }
+
   
   void setNotificationsEnabled(bool enabled) {
     _notificationsEnabled = enabled;

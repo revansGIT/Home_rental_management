@@ -81,8 +81,7 @@
   "displayLanguage": "অ্যাপের প্রদর্শন ভাষা",
   "notifications": "বিজ্ঞপ্তি",
   "notificationDesc": "পেমেন্ট ও লিজ রিমাইন্ডার",
-  "darkMode": "ডার্ক মোড",
-  "enableDarkTheme": "ডার্ক থিম সক্ষম করুন",
+
   "dataSecurity": "ডেটা ও নিরাপত্তা",
   "backupRestore": "ব্যাকআপ ও পুনরুদ্ধার",
   "backupDesc": "আপনার ডেটা সংরক্ষণ ও পুনরুদ্ধার করুন",

@@ -252,12 +252,6 @@ class AppLocalizationsBn extends AppLocalizations {
   String get notificationDesc => 'পেমেন্ট ও লিজ রিমাইন্ডার';
 
   @override
-  String get darkMode => 'ডার্ক মোড';
-
-  @override
-  String get enableDarkTheme => 'ডার্ক থিম সক্ষম করুন';
-
-  @override
   String get dataSecurity => 'ডেটা ও নিরাপত্তা';
 
   @override

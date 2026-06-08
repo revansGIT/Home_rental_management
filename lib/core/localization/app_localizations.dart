@@ -584,18 +584,6 @@ abstract class AppLocalizations {
   /// **'Payment & lease reminders'**
   String get notificationDesc;
 
-  /// No description provided for @darkMode.
-  ///
-  /// In en, this message translates to:
-  /// **'Dark Mode'**
-  String get darkMode;
-
-  /// No description provided for @enableDarkTheme.
-  ///
-  /// In en, this message translates to:
-  /// **'Enable dark theme'**
-  String get enableDarkTheme;
-
   /// No description provided for @dataSecurity.
   ///
   /// In en, this message translates to:
