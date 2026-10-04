@@ -289,4 +289,29 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get logout => 'লগ আউট';
+
+  @override
+  String get appearance => 'চেহারা';
+
+  @override
+  String get theme => 'থিম';
+
+  @override
+  String get themeSystem => 'সিস্টেম';
+
+  @override
+  String get themeLight => 'লাইট';
+
+  @override
+  String get themeDark => 'ডার্ক';
+
+  @override
+  String get dynamicColor => 'ডায়নামিক রং';
+
+  @override
+  String get dynamicColorDesc =>
+      'ওয়ালপেপার থেকে রং ব্যবহার করুন (Android 12+)';
+
+  @override
+  String get about => 'সম্পর্কে';
 }

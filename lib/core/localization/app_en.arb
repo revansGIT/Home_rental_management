@@ -94,5 +94,13 @@
   "supportDesc": "Get help from our team",
   "appVersion": "App Version",
   "lastBackup": "Last Backup",
-  "logout": "Log Out"
+  "logout": "Log Out",
+  "appearance": "Appearance",
+  "theme": "Theme",
+  "themeSystem": "System",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "dynamicColor": "Dynamic color",
+  "dynamicColorDesc": "Use colors from your wallpaper (Android 12+)",
+  "about": "About"
 }

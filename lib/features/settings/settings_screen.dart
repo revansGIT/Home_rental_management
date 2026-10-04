@@ -24,6 +24,64 @@ class SettingsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Appearance
+            _SettingsSection(
+              title: localizations.appearance,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                  child: Row(
+                    children: [
+                      _TileIcon(icon: Icons.palette_outlined),
+                      const SizedBox(width: 16),
+                      Text(
+                        localizations.theme,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: SegmentedButton<ThemeMode>(
+                      showSelectedIcon: false,
+                      segments: [
+                        ButtonSegment(
+                          value: ThemeMode.system,
+                          icon: const Icon(Icons.brightness_auto_outlined),
+                          label: Text(localizations.themeSystem),
+                        ),
+                        ButtonSegment(
+                          value: ThemeMode.light,
+                          icon: const Icon(Icons.light_mode_outlined),
+                          label: Text(localizations.themeLight),
+                        ),
+                        ButtonSegment(
+                          value: ThemeMode.dark,
+                          icon: const Icon(Icons.dark_mode_outlined),
+                          label: Text(localizations.themeDark),
+                        ),
+                      ],
+                      selected: {appProvider.themeMode},
+                      onSelectionChanged: (s) => appProvider.setThemeMode(s.first),
+                    ),
+                  ),
+                ),
+                _SettingsTile(
+                  icon: Icons.wallpaper_outlined,
+                  title: localizations.dynamicColor,
+                  subtitle: localizations.dynamicColorDesc,
+                  trailing: Switch(
+                    value: appProvider.useDynamicColor,
+                    onChanged: appProvider.setUseDynamicColor,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
             // Language Setting
             _SettingsSection(
               title: localizations.language,
@@ -149,7 +207,7 @@ class SettingsScreen extends StatelessWidget {
 
             // App Info
             _SettingsSection(
-              title: 'About',
+              title: localizations.about,
               children: [
                 _SettingsTile(
                   icon: Icons.info_outline,
@@ -173,8 +231,8 @@ class SettingsScreen extends StatelessWidget {
                 icon: const Icon(Icons.logout),
                 label: Text(localizations.logout),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
+                  backgroundColor: Theme.of(context).colorScheme.errorContainer,
+                  foregroundColor: Theme.of(context).colorScheme.onErrorContainer,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
               ),
@@ -213,10 +271,10 @@ class _SettingsSection extends StatelessWidget {
         ),
         Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+            color: Theme.of(context).colorScheme.surfaceContainerLow,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5),
+              color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
             ),
           ),
           child: Column(children: children),
@@ -244,14 +302,7 @@ class _SettingsTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primaryContainer,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Icon(icon, color: Theme.of(context).colorScheme.onPrimaryContainer, size: 22),
-      ),
+      leading: _TileIcon(icon: icon),
       title: Text(
         title,
         style: const TextStyle(fontWeight: FontWeight.w600),
@@ -265,6 +316,24 @@ class _SettingsTile extends StatelessWidget {
       trailing:
           trailing ?? (onTap != null ? Icon(Icons.chevron_right, color: Theme.of(context).colorScheme.onSurfaceVariant) : null),
       onTap: onTap,
+    );
+  }
+}
+
+class _TileIcon extends StatelessWidget {
+  final IconData icon;
+  const _TileIcon({required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: cs.primaryContainer,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Icon(icon, color: cs.onPrimaryContainer, size: 22),
     );
   }
 }

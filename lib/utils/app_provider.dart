@@ -8,6 +8,8 @@ class AppProvider extends ChangeNotifier {
 
   Locale _locale = const Locale('bn');
   AppCurrency _currency = AppCurrency.bdt;
+  ThemeMode _themeMode = ThemeMode.system;
+  bool _useDynamicColor = false;
 
   bool _notificationsEnabled = true;
 
@@ -24,14 +26,21 @@ class AppProvider extends ChangeNotifier {
       (e) => e.toString() == 'AppCurrency.$currencyStr',
       orElse: () => AppCurrency.bdt,
     );
-    
 
-    
+    final themeStr = _settingsBox.get('themeMode', defaultValue: 'system') as String;
+    _themeMode = ThemeMode.values.firstWhere(
+      (m) => m.name == themeStr,
+      orElse: () => ThemeMode.system,
+    );
+    _useDynamicColor = _settingsBox.get('useDynamicColor', defaultValue: false) as bool;
+
     _notificationsEnabled = _settingsBox.get('notificationsEnabled', defaultValue: true);
   }
 
   Locale get locale => _locale;
   AppCurrency get currency => _currency;
+  ThemeMode get themeMode => _themeMode;
+  bool get useDynamicColor => _useDynamicColor;
 
   bool get notificationsEnabled => _notificationsEnabled;
 
@@ -47,8 +56,19 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setThemeMode(ThemeMode mode) {
+    if (_themeMode == mode) return;
+    _themeMode = mode;
+    _settingsBox.put('themeMode', mode.name);
+    notifyListeners();
+  }
 
-  
+  void setUseDynamicColor(bool value) {
+    _useDynamicColor = value;
+    _settingsBox.put('useDynamicColor', value);
+    notifyListeners();
+  }
+
   void setNotificationsEnabled(bool enabled) {
     _notificationsEnabled = enabled;
     _settingsBox.put('notificationsEnabled', enabled);

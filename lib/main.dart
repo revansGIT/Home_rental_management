@@ -1,5 +1,7 @@
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'core/theme/app_theme.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:home_rental_management/core/localization/app_localizations.dart';
 import 'package:home_rental_management/core/providers/activity_provider.dart';
@@ -64,30 +66,30 @@ class _MyAppState extends State<MyApp> {
       ],
       child: Consumer<AppProvider>(
         builder: (context, appProvider, _) {
-          return MaterialApp.router(
-            title: 'Home Rental Management',
-            debugShowCheckedModeBanner: false,
-            localizationsDelegates: const [
-              AppLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: const [
-              Locale('en'), // English
-              Locale('bn'), // Bengali
-            ],
-            locale: appProvider.locale,
-
-            theme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(
-                seedColor: Colors.blue,
-                brightness: Brightness.light,
-              ),
-              useMaterial3: true,
-            ),
-
-            routerConfig: appRouter,
+          return DynamicColorBuilder(
+            builder: (lightDynamic, darkDynamic) {
+              final useDyn = appProvider.useDynamicColor;
+              return MaterialApp.router(
+                title: 'Home Rental Management',
+                debugShowCheckedModeBanner: false,
+                localizationsDelegates: const [
+                  AppLocalizations.delegate,
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
+                supportedLocales: const [
+                  Locale('en'), // English
+                  Locale('bn'), // Bengali
+                ],
+                locale: appProvider.locale,
+                theme: AppTheme.light(useDyn ? lightDynamic : null),
+                darkTheme: AppTheme.dark(useDyn ? darkDynamic : null),
+                themeMode: appProvider.themeMode,
+                themeAnimationDuration: const Duration(milliseconds: 300),
+                routerConfig: appRouter,
+              );
+            },
           );
         },
       ),

@@ -94,5 +94,13 @@
   "supportDesc": "আমাদের টিম থেকে সাহায্য পান",
   "appVersion": "অ্যাপ সংস্করণ",
   "lastBackup": "শেষ ব্যাকআপ",
-  "logout": "লগ আউট"
+  "logout": "লগ আউট",
+  "appearance": "চেহারা",
+  "theme": "থিম",
+  "themeSystem": "সিস্টেম",
+  "themeLight": "লাইট",
+  "themeDark": "ডার্ক",
+  "dynamicColor": "ডায়নামিক রং",
+  "dynamicColorDesc": "ওয়ালপেপার থেকে রং ব্যবহার করুন (Android 12+)",
+  "about": "সম্পর্কে"
 }
