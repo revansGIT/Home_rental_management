@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:home_rental_management/core/theme/app_theme.dart';
 import 'package:home_rental_management/core/localization/app_localizations.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/providers/activity_provider.dart';
@@ -15,7 +16,7 @@ class RecentActivityScreen extends StatelessWidget {
     final activities = activityProv.activities;
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: context.cs.surface,
       appBar: CustomAppBar(
         title: localizations.recentActivity,
       ),
@@ -32,23 +33,23 @@ class RecentActivityScreen extends StatelessWidget {
                 switch (activity.iconCode) {
                   case 'business':
                     icon = Icons.business;
-                    color = Colors.blue;
+                    color = context.cs.primary;
                     break;
                   case 'apartment':
                     icon = Icons.apartment;
-                    color = Colors.indigo;
+                    color = context.appColors.accent;
                     break;
                   case 'person_add':
                     icon = Icons.person_add;
-                    color = Colors.orange;
+                    color = context.appColors.warning;
                     break;
                   case 'payment':
                     icon = Icons.payment;
-                    color = Colors.green;
+                    color = context.appColors.success;
                     break;
                   default:
                     icon = Icons.notifications;
-                    color = Colors.grey;
+                    color = context.cs.onSurfaceVariant;
                 }
 
                 return _ActivityItem(
@@ -85,11 +86,11 @@ class _ActivityItem extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cs.surfaceContainerLow,
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
+            color: context.cs.shadow.withValues(alpha: 0.06),
             spreadRadius: 1,
             blurRadius: 2,
           ),
@@ -117,14 +118,14 @@ class _ActivityItem extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  style: TextStyle(fontSize: 12, color: context.cs.onSurfaceVariant),
                 ),
               ],
             ),
           ),
           Text(
             time,
-            style: const TextStyle(fontSize: 12, color: Colors.grey),
+            style: TextStyle(fontSize: 12, color: context.cs.onSurfaceVariant),
           ),
         ],
       ),

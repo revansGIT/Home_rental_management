@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:home_rental_management/core/theme/app_theme.dart';
 import 'package:home_rental_management/core/localization/app_localizations.dart';
 import 'package:home_rental_management/core/services/notification_service.dart';
 import 'package:home_rental_management/features/properties/presentation/widgets/add_unit_dialog.dart';
@@ -32,7 +33,7 @@ class PropertyDetailsScreen extends StatelessWidget {
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(backgroundColor: context.cs.error),
             onPressed: () async {
               await propertyProv.deleteProperty(propertyId);
               actProv.logActivity(
@@ -45,7 +46,7 @@ class PropertyDetailsScreen extends StatelessWidget {
                 context.pop(); // Go back to list
               }
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.white)),
+            child: Text('Delete', style: TextStyle(color: context.cs.onError)),
           ),
         ],
       ),
@@ -77,7 +78,7 @@ class PropertyDetailsScreen extends StatelessWidget {
         units.isEmpty ? 0 : (occupiedUnits / units.length * 100).round();
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: context.cs.surface,
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
@@ -86,12 +87,12 @@ class PropertyDetailsScreen extends StatelessWidget {
             pinned: true,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back),
-              color: property.imagePath != null ? Colors.white : Colors.black87,
+              color: property.imagePath != null ? Colors.white : context.cs.onSurface,
               onPressed: () => context.pop(),
             ),
             actions: [
               PopupMenuButton<String>(
-                icon: Icon(Icons.more_vert, color: property.imagePath != null ? Colors.white : Colors.black87),
+                icon: Icon(Icons.more_vert, color: property.imagePath != null ? Colors.white : context.cs.onSurface),
                 onSelected: (value) {
                   if (value == 'edit') {
                     showDialog(
@@ -103,19 +104,19 @@ class PropertyDetailsScreen extends StatelessWidget {
                   }
                 },
                 itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                  const PopupMenuItem<String>(
+                  PopupMenuItem<String>(
                     value: 'edit',
                     child: ListTile(
-                      leading: Icon(Icons.edit, color: Colors.blue),
-                      title: Text('Edit Property'),
+                      leading: Icon(Icons.edit, color: context.cs.primary),
+                      title: const Text('Edit Property'),
                       contentPadding: EdgeInsets.zero,
                     ),
                   ),
-                  const PopupMenuItem<String>(
+                  PopupMenuItem<String>(
                     value: 'delete',
                     child: ListTile(
-                      leading: Icon(Icons.delete, color: Colors.red),
-                      title: Text('Delete Property', style: TextStyle(color: Colors.red)),
+                      leading: Icon(Icons.delete, color: context.cs.error),
+                      title: Text('Delete Property', style: TextStyle(color: context.cs.error)),
                       contentPadding: EdgeInsets.zero,
                     ),
                   ),
@@ -126,7 +127,7 @@ class PropertyDetailsScreen extends StatelessWidget {
               title: Text(
                 property.name,
                 style: TextStyle(
-                  color: property.imagePath != null ? Colors.white : Colors.black87,
+                  color: property.imagePath != null ? Colors.white : context.cs.onSurface,
                   fontWeight: FontWeight.bold,
                   shadows: property.imagePath != null ? [
                     const Shadow(
@@ -145,13 +146,13 @@ class PropertyDetailsScreen extends StatelessWidget {
                   : Container(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [Colors.blue[100]!, Colors.blue[50]!],
+                          colors: [context.cs.primaryContainer, context.cs.primaryContainer],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
                       ),
                       child: Center(
-                        child: Icon(Icons.business, size: 80, color: Colors.blue[300]),
+                        child: Icon(Icons.business, size: 80, color: context.cs.primary.withValues(alpha: 0.5)),
                       ),
                     ),
             ),
@@ -167,12 +168,12 @@ class PropertyDetailsScreen extends StatelessWidget {
                     children: [
                       Text(
                         localizations.propertyInformation,
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: context.cs.onSurface),
                       ),
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue[700],
-                          foregroundColor: Colors.white,
+                          backgroundColor: context.cs.primary,
+                          foregroundColor: context.cs.onPrimary,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                         ),
                         onPressed: () {
@@ -211,7 +212,7 @@ class PropertyDetailsScreen extends StatelessWidget {
                   // Units Overview
                   Text(
                     localizations.unitsOverview,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: context.cs.onSurface),
                   ),
                   const SizedBox(height: 12),
                   units.isEmpty
@@ -219,22 +220,22 @@ class PropertyDetailsScreen extends StatelessWidget {
                           width: double.infinity,
                           padding: const EdgeInsets.symmetric(vertical: 40),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: context.cs.surfaceContainerLow,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey[200]!),
+                            border: Border.all(color: context.cs.outlineVariant),
                           ),
                           child: Column(
                             children: [
-                              Icon(Icons.home_work_outlined, size: 48, color: Colors.grey[400]),
+                              Icon(Icons.home_work_outlined, size: 48, color: context.cs.onSurfaceVariant),
                               const SizedBox(height: 16),
                               Text(
                                 'No units added yet',
-                                style: TextStyle(color: Colors.grey[600], fontSize: 16, fontWeight: FontWeight.w500),
+                                style: TextStyle(color: context.cs.onSurfaceVariant, fontSize: 16, fontWeight: FontWeight.w500),
                               ),
                               const SizedBox(height: 8),
                               Text(
                                 'Click "Add Unit" to get started',
-                                style: TextStyle(color: Colors.grey[400], fontSize: 14),
+                                style: TextStyle(color: context.cs.onSurfaceVariant, fontSize: 14),
                               ),
                             ],
                           ),
@@ -311,7 +312,7 @@ class PropertyDetailsScreen extends StatelessWidget {
                                           child: const Text('Cancel'),
                                         ),
                                         ElevatedButton(
-                                          style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                                          style: ElevatedButton.styleFrom(backgroundColor: context.cs.error),
                                           onPressed: () async {
                                             await propertyProv.deleteUnit(unit.id);
                                             actProv.logActivity(
@@ -321,7 +322,7 @@ class PropertyDetailsScreen extends StatelessWidget {
                                             );
                                             if (ctx.mounted) Navigator.pop(ctx);
                                           },
-                                          child: const Text('Delete', style: TextStyle(color: Colors.white)),
+                                          child: Text('Delete', style: TextStyle(color: context.cs.onError)),
                                         ),
                                       ],
                                     ),
@@ -350,11 +351,11 @@ class _InfoCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cs.surfaceContainerLow,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.08),
+            color: context.cs.shadow.withValues(alpha: 0.06),
             spreadRadius: 2,
             blurRadius: 12,
             offset: const Offset(0, 4),
@@ -379,11 +380,11 @@ class _InfoRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 15)),
+          Text(label, style: TextStyle(color: context.cs.onSurfaceVariant, fontSize: 15)),
           Expanded(
             child: Text(
               value, 
-              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: Colors.black87),
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: context.cs.onSurface),
               textAlign: TextAlign.right,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -423,11 +424,11 @@ class _UnitCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cs.surfaceContainerLow,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.05),
+            color: context.cs.shadow.withValues(alpha: 0.06),
             spreadRadius: 1,
             blurRadius: 8,
             offset: const Offset(0, 2),
@@ -447,15 +448,15 @@ class _UnitCard extends StatelessWidget {
                   width: 52,
                   height: 52,
                   decoration: BoxDecoration(
-                    color: isOccupied ? Colors.green[50] : Colors.grey[100],
+                    color: isOccupied ? context.appColors.successContainer : context.cs.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: isOccupied ? Colors.green[200]! : Colors.grey[200]!,
+                      color: isOccupied ? context.appColors.success.withValues(alpha: 0.4) : context.cs.outlineVariant,
                     )
                   ),
                   child: Icon(
                     isOccupied ? Icons.home : Icons.home_outlined,
-                    color: isOccupied ? Colors.green[700] : Colors.grey[500],
+                    color: isOccupied ? context.appColors.success : context.cs.onSurfaceVariant,
                     size: 26,
                   ),
                 ),
@@ -466,13 +467,13 @@ class _UnitCard extends StatelessWidget {
                     children: [
                       Text(
                         'Unit $unitNumber',
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold, color: context.cs.onSurface),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         tenant ?? status,
-                        style: TextStyle(fontSize: 14, color: isOccupied ? Colors.black54 : Colors.grey[500]),
+                        style: TextStyle(fontSize: 14, color: isOccupied ? context.cs.onSurfaceVariant : context.cs.onSurfaceVariant),
                       ),
                     ],
                   ),
@@ -483,7 +484,7 @@ class _UnitCard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: isOccupied ? Colors.blue[50] : Colors.grey[50],
+                        color: isOccupied ? context.cs.primaryContainer : context.cs.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
@@ -491,13 +492,13 @@ class _UnitCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
-                          color: isOccupied ? Colors.blue[700] : Colors.grey[600],
+                          color: isOccupied ? context.cs.primary : context.cs.onSurfaceVariant,
                         ),
                       ),
                     ),
                     const SizedBox(width: 4),
                     PopupMenuButton<String>(
-                      icon: const Icon(Icons.more_vert, color: Colors.black54),
+                      icon: Icon(Icons.more_vert, color: context.cs.onSurfaceVariant),
                       onSelected: (value) {
                         if (value == 'edit') {
                           onEdit();
@@ -508,27 +509,27 @@ class _UnitCard extends StatelessWidget {
                         }
                       },
                       itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                        const PopupMenuItem<String>(
+                        PopupMenuItem<String>(
                           value: 'edit',
                           child: ListTile(
-                            leading: Icon(Icons.edit, color: Colors.blue),
-                            title: Text('Edit Unit'),
+                            leading: Icon(Icons.edit, color: context.cs.primary),
+                            title: const Text('Edit Unit'),
                             contentPadding: EdgeInsets.zero,
                           ),
                         ),
-                        const PopupMenuItem<String>(
+                        PopupMenuItem<String>(
                           value: 'notify',
                           child: ListTile(
-                            leading: Icon(Icons.notification_add, color: Colors.orange),
-                            title: Text('Set Reminder'),
+                            leading: Icon(Icons.notification_add, color: context.appColors.warning),
+                            title: const Text('Set Reminder'),
                             contentPadding: EdgeInsets.zero,
                           ),
                         ),
-                        const PopupMenuItem<String>(
+                        PopupMenuItem<String>(
                           value: 'delete',
                           child: ListTile(
-                            leading: Icon(Icons.delete, color: Colors.red),
-                            title: Text('Delete Unit', style: TextStyle(color: Colors.red)),
+                            leading: Icon(Icons.delete, color: context.cs.error),
+                            title: Text('Delete Unit', style: TextStyle(color: context.cs.error)),
                             contentPadding: EdgeInsets.zero,
                           ),
                         ),

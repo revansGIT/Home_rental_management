@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:home_rental_management/core/theme/app_theme.dart';
 import 'package:home_rental_management/core/localization/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
@@ -29,17 +30,17 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
     }).toList();
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: context.cs.surface,
       appBar: CustomAppBar(
         title: localizations.properties,
         showBackButton: false,
         actions: [
           IconButton(
             style: IconButton.styleFrom(
-              backgroundColor: Colors.blue[50],
+              backgroundColor: context.cs.primaryContainer,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            icon: Icon(Icons.add, color: Colors.blue[700], size: 20),
+            icon: Icon(Icons.add, color: context.cs.primary, size: 20),
             tooltip: localizations.addProperty,
             onPressed: () {
               showDialog(
@@ -58,14 +59,14 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
             child: TextField(
               decoration: InputDecoration(
                 hintText: localizations.searchProperties,
-                hintStyle: TextStyle(color: Colors.grey[400]),
-                prefixIcon: Icon(Icons.search, color: Colors.grey[400]),
+                hintStyle: TextStyle(color: context.cs.onSurfaceVariant),
+                prefixIcon: Icon(Icons.search, color: context.cs.onSurfaceVariant),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
                   borderSide: BorderSide.none,
                 ),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: context.cs.surfaceContainerLow,
                 contentPadding: const EdgeInsets.symmetric(vertical: 0),
               ),
               onChanged: (value) {
@@ -81,16 +82,16 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.business_outlined, size: 80, color: Colors.grey[300]),
+                        Icon(Icons.business_outlined, size: 80, color: context.cs.outlineVariant),
                         const SizedBox(height: 16),
                         Text(
                           'No properties found',
-                          style: TextStyle(fontSize: 18, color: Colors.grey[600], fontWeight: FontWeight.w600),
+                          style: TextStyle(fontSize: 18, color: context.cs.onSurfaceVariant, fontWeight: FontWeight.w600),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           'Click + to add your first property',
-                          style: TextStyle(fontSize: 14, color: Colors.grey[400]),
+                          style: TextStyle(fontSize: 14, color: context.cs.onSurfaceVariant),
                         ),
                       ],
                     ),
@@ -128,9 +129,9 @@ class _PropertyListScreenState extends State<PropertyListScreen> {
             builder: (_) => const AddPropertyDialog(),
           );
         },
-        backgroundColor: Colors.blue[700],
-        icon: const Icon(Icons.add_business, color: Colors.white),
-        label: Text(localizations.addProperty, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        backgroundColor: context.cs.primary,
+        icon: Icon(Icons.add_business, color: context.cs.onPrimary),
+        label: Text(localizations.addProperty, style: TextStyle(color: context.cs.onPrimary, fontWeight: FontWeight.bold)),
         elevation: 4,
       ),
     );
@@ -159,11 +160,11 @@ class _PropertyCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cs.surfaceContainerLow,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.08),
+            color: context.cs.shadow.withValues(alpha: 0.06),
             spreadRadius: 2,
             blurRadius: 12,
             offset: const Offset(0, 4),
@@ -188,20 +189,20 @@ class _PropertyCard extends StatelessWidget {
                       height: 64,
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [Colors.blue[400]!, Colors.blue[700]!],
+                          colors: [context.cs.primary.withValues(alpha: 0.75), context.cs.primary],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.blue.withValues(alpha: 0.3),
+                            color: context.cs.primary.withValues(alpha: 0.3),
                             blurRadius: 8,
                             offset: const Offset(0, 4),
                           )
                         ]
                       ),
-                      child: const Icon(Icons.business, color: Colors.white, size: 32),
+                      child: Icon(Icons.business, color: context.cs.onPrimary, size: 32),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -210,21 +211,21 @@ class _PropertyCard extends StatelessWidget {
                         children: [
                           Text(
                             title,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black87,
+                              color: context.cs.onSurface,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Row(
                             children: [
-                              Icon(Icons.location_on, size: 14, color: Colors.grey[500]),
+                              Icon(Icons.location_on, size: 14, color: context.cs.onSurfaceVariant),
                               const SizedBox(width: 4),
                               Expanded(
                                 child: Text(
                                   address,
-                                  style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                                  style: TextStyle(fontSize: 13, color: context.cs.onSurfaceVariant),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -237,13 +238,13 @@ class _PropertyCard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Colors.blue[50],
+                        color: context.cs.primaryContainer,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
                         unitsText,
                         style: TextStyle(
-                          color: Colors.blue[700],
+                          color: context.cs.primary,
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                         ),
@@ -255,9 +256,9 @@ class _PropertyCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.grey[50],
+                    color: context.cs.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey[200]!),
+                    border: Border.all(color: context.cs.outlineVariant),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -267,15 +268,15 @@ class _PropertyCard extends StatelessWidget {
                         children: [
                           Text(
                             'Monthly Value',
-                            style: TextStyle(fontSize: 12, color: Colors.grey[500], fontWeight: FontWeight.w600),
+                            style: TextStyle(fontSize: 12, color: context.cs.onSurfaceVariant, fontWeight: FontWeight.w600),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             revenue,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black87,
+                              color: context.cs.onSurface,
                             ),
                           ),
                         ],
@@ -283,14 +284,14 @@ class _PropertyCard extends StatelessWidget {
                       Container(
                         height: 32,
                         width: 1,
-                        color: Colors.grey[300],
+                        color: context.cs.outlineVariant,
                       ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'Occupancy',
-                            style: TextStyle(fontSize: 12, color: Colors.grey[500], fontWeight: FontWeight.w600),
+                            style: TextStyle(fontSize: 12, color: context.cs.onSurfaceVariant, fontWeight: FontWeight.w600),
                           ),
                           const SizedBox(height: 6),
                           Row(
@@ -302,9 +303,9 @@ class _PropertyCard extends StatelessWidget {
                                   child: LinearProgressIndicator(
                                     value: occupancyRate,
                                     minHeight: 6,
-                                    backgroundColor: Colors.grey[200],
+                                    backgroundColor: context.cs.outlineVariant,
                                     valueColor: AlwaysStoppedAnimation<Color>(
-                                      occupancyRate >= 0.8 ? Colors.green : (occupancyRate >= 0.5 ? Colors.orange : Colors.red)
+                                      occupancyRate >= 0.8 ? context.appColors.success : (occupancyRate >= 0.5 ? context.appColors.warning : context.cs.error)
                                     ),
                                   ),
                                 ),
@@ -312,10 +313,10 @@ class _PropertyCard extends StatelessWidget {
                               const SizedBox(width: 8),
                               Text(
                                 '${(occupancyRate * 100).toInt()}%',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
+                                  color: context.cs.onSurface,
                                 ),
                               ),
                             ],

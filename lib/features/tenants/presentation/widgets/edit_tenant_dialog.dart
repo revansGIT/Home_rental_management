@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:home_rental_management/core/theme/app_theme.dart';
 import 'package:home_rental_management/core/models/tenant_model.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
@@ -76,13 +77,13 @@ class _EditTenantDialogState extends State<EditTenantDialog> {
                     onTap: _pickImage,
                     child: CircleAvatar(
                       radius: 50,
-                      backgroundColor: Colors.blue[50],
+                      backgroundColor: context.cs.primaryContainer,
                       backgroundImage: _imagePath != null
                           ? FileImage(File(_imagePath!))
                           : null,
                       child: _imagePath == null
                           ? Icon(Icons.add_a_photo,
-                              size: 30, color: Colors.blue[700])
+                              size: 30, color: context.cs.primary)
                           : null,
                     ),
                   ),
@@ -159,8 +160,8 @@ class _EditTenantDialogState extends State<EditTenantDialog> {
                   height: 50,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue[700],
-                      foregroundColor: Colors.white,
+                      backgroundColor: context.cs.primary,
+                      foregroundColor: context.cs.onPrimary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:home_rental_management/core/theme/app_theme.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/localization/app_localizations.dart';
@@ -27,17 +28,17 @@ class _TenantListScreenState extends State<TenantListScreen> {
     }).toList();
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: context.cs.surface,
       appBar: CustomAppBar(
         title: localizations.tenants,
         showBackButton: false,
         actions: [
           IconButton(
             style: IconButton.styleFrom(
-              backgroundColor: Colors.blue[50],
+              backgroundColor: context.cs.primaryContainer,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            icon: Icon(Icons.person_add, color: Colors.blue[700], size: 20),
+            icon: Icon(Icons.person_add, color: context.cs.primary, size: 20),
             tooltip: 'Add Tenant', // Should be localized
             onPressed: () {
               showDialog(
@@ -60,7 +61,7 @@ class _TenantListScreenState extends State<TenantListScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: context.cs.surfaceContainerLow,
               ),
               onChanged: (value) {
                 setState(() {
@@ -75,16 +76,16 @@ class _TenantListScreenState extends State<TenantListScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.people_outline, size: 80, color: Colors.grey[300]),
+                        Icon(Icons.people_outline, size: 80, color: context.cs.outlineVariant),
                         const SizedBox(height: 16),
                         Text(
                           'No tenants found',
-                          style: TextStyle(fontSize: 18, color: Colors.grey[600], fontWeight: FontWeight.w600),
+                          style: TextStyle(fontSize: 18, color: context.cs.onSurfaceVariant, fontWeight: FontWeight.w600),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           'Click + to add your first tenant',
-                          style: TextStyle(fontSize: 14, color: Colors.grey[400]),
+                          style: TextStyle(fontSize: 14, color: context.cs.onSurfaceVariant),
                         ),
                       ],
                     ),
@@ -99,13 +100,13 @@ class _TenantListScreenState extends State<TenantListScreen> {
                   margin: const EdgeInsets.only(bottom: 12),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   elevation: 2,
-                  shadowColor: Colors.grey.withValues(alpha: 0.1),
+                  shadowColor: context.cs.shadow.withValues(alpha: 0.06),
                   child: ListTile(
                     contentPadding: const EdgeInsets.all(16),
                     leading: CircleAvatar(
-                      backgroundColor: Colors.blue[100],
+                      backgroundColor: context.cs.primaryContainer,
                       radius: 24,
-                      child: Icon(Icons.person, color: Colors.blue[700]),
+                      child: Icon(Icons.person, color: context.cs.primary),
                     ),
                     title: Text(
                       tenant.name,
@@ -113,9 +114,9 @@ class _TenantListScreenState extends State<TenantListScreen> {
                     ),
                     subtitle: Text(
                       tenant.phone,
-                      style: TextStyle(color: Colors.grey[600]),
+                      style: TextStyle(color: context.cs.onSurfaceVariant),
                     ),
-                    trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                    trailing: Icon(Icons.chevron_right, color: context.cs.onSurfaceVariant),
                     onTap: () {
                       context.go('/tenants/${tenant.id}');
                     },
@@ -133,9 +134,9 @@ class _TenantListScreenState extends State<TenantListScreen> {
             builder: (_) => const AddTenantDialog(),
           );
         },
-        backgroundColor: Colors.blue[700],
-        icon: const Icon(Icons.person_add, color: Colors.white),
-        label: const Text('Add Tenant', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        backgroundColor: context.cs.primary,
+        icon: Icon(Icons.person_add, color: context.cs.onPrimary),
+        label: Text('Add Tenant', style: TextStyle(color: context.cs.onPrimary, fontWeight: FontWeight.bold)),
         elevation: 4,
       ),
     );

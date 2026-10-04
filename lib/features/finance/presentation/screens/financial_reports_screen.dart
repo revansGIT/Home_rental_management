@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:home_rental_management/core/theme/app_theme.dart';
 import 'package:home_rental_management/core/localization/app_localizations.dart';
 import 'package:provider/provider.dart';
 import '../../../../utils/app_provider.dart';
@@ -7,7 +8,6 @@ import '../providers/finance_provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import 'dart:io';
-import 'package:csv/csv.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../core/models/payment_model.dart';
@@ -16,11 +16,23 @@ import '../widgets/record_payment_dialog.dart';
 class FinancialReportsScreen extends StatelessWidget {
   const FinancialReportsScreen({super.key});
 
+  /// Minimal RFC 4180 CSV encoder.
+  static String _toCsv(List<List<dynamic>> rows) {
+    String esc(dynamic v) {
+      final s = '${v ?? ''}';
+      final needsQuotes = s.contains(RegExp(r'[,"\r\n]'));
+      final q = s.replaceAll('"', '""');
+      return needsQuotes ? '"$q"' : q;
+    }
+
+    return rows.map((r) => r.map(esc).join(',')).join('\r\n');
+  }
+
   Future<void> _exportToCsv(BuildContext context, List<PaymentModel> payments, AppProvider appProvider) async {
     try {
       List<List<dynamic>> rows = [];
       // Header row
-      rows.add(["Date", "Description", "Amount", "Status", "Tenant ID"]);
+      rows.add(['Date', 'Description', 'Amount', 'Status', 'Tenant ID']);
 
       // Data rows
       for (var payment in payments) {
@@ -33,18 +45,23 @@ class FinancialReportsScreen extends StatelessWidget {
         ]);
       }
 
-      String csvData = ListToCsvConverter().convert(rows);
+      final csvData = _toCsv(rows);
 
       final directory = await getApplicationDocumentsDirectory();
       final path = '${directory.path}/financial_report.csv';
       final file = File(path);
-      await file.writeAsString(csvData);
+      // BOM so Excel opens UTF-8 (currency symbol, Bengali) correctly.
+      await file.writeAsString('\uFEFF$csvData');
 
       if (context.mounted) {
         final box = context.findRenderObject() as RenderBox?;
-        await Share.shareXFiles([XFile(path)], 
-          subject: 'Financial Report', 
-          sharePositionOrigin: box!.localToGlobal(Offset.zero) & box.size
+        await SharePlus.instance.share(
+          ShareParams(
+            files: [XFile(path)],
+            subject: 'Financial Report',
+            sharePositionOrigin:
+                box == null ? null : box.localToGlobal(Offset.zero) & box.size,
+          ),
         );
       }
     } catch (e) {
@@ -67,17 +84,17 @@ class FinancialReportsScreen extends StatelessWidget {
     final totalPending = financeProv.totalPending;
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: context.cs.surface,
       appBar: CustomAppBar(
         title: localizations.financialReports,
         showBackButton: false,
         actions: [
           IconButton(
             style: IconButton.styleFrom(
-              backgroundColor: Colors.blue[50],
+              backgroundColor: context.cs.primaryContainer,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            icon: Icon(Icons.payment, color: Colors.blue[700], size: 20),
+            icon: Icon(Icons.payment, color: context.cs.primary, size: 20),
             tooltip: 'Record Payment', 
             onPressed: () {
               showDialog(
@@ -112,7 +129,7 @@ class FinancialReportsScreen extends StatelessWidget {
                   child: _SummaryCard(
                     title: localizations.totalRevenue,
                     value: appProvider.formatCurrency(totalCollected),
-                    color: Colors.green,
+                    color: context.appColors.success,
                     icon: Icons.trending_up,
                   ),
                 ),
@@ -121,7 +138,7 @@ class FinancialReportsScreen extends StatelessWidget {
                   child: _SummaryCard(
                     title: localizations.totalExpense,
                     value: appProvider.formatCurrency(totalPending),
-                    color: Colors.red,
+                    color: context.cs.error,
                     icon: Icons.trending_down,
                   ),
                 ),
@@ -132,7 +149,7 @@ class FinancialReportsScreen extends StatelessWidget {
               title: localizations.netProfit,
               value: appProvider.formatCurrency(80000),
               subtitle: '64% ${localizations.margin}',
-              color: Colors.blue,
+              color: context.cs.primary,
               icon: Icons.account_balance_wallet,
               isWide: true,
             ),
@@ -147,11 +164,11 @@ class FinancialReportsScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.cs.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withValues(alpha: 0.1),
+                    color: context.cs.shadow.withValues(alpha: 0.06),
                     spreadRadius: 1,
                     blurRadius: 4,
                   ),
@@ -167,25 +184,25 @@ class FinancialReportsScreen extends StatelessWidget {
                         centerSpaceRadius: 40,
                         sections: [
                           PieChartSectionData(
-                            color: Colors.blue,
+                            color: context.cs.primary,
                             value: 44,
                             title: '44%',
                             radius: 50,
-                            titleStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                            titleStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: context.cs.surface),
                           ),
                           PieChartSectionData(
-                            color: Colors.orange,
+                            color: context.appColors.warning,
                             value: 33,
                             title: '33%',
                             radius: 50,
-                            titleStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                            titleStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: context.cs.surface),
                           ),
                           PieChartSectionData(
-                            color: Colors.purple,
+                            color: context.appColors.accent,
                             value: 23,
                             title: '23%',
                             radius: 50,
-                            titleStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                            titleStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: context.cs.surface),
                           ),
                         ],
                       ),
@@ -196,19 +213,19 @@ class FinancialReportsScreen extends StatelessWidget {
                     label: 'Maintenance',
                     amount: appProvider.formatCurrency(20000),
                     percentage: 44,
-                    color: Colors.blue,
+                    color: context.cs.primary,
                   ),
                   _ExpenseItem(
                     label: 'Utilities',
                     amount: appProvider.formatCurrency(15000),
                     percentage: 33,
-                    color: Colors.orange,
+                    color: context.appColors.warning,
                   ),
                   _ExpenseItem(
                     label: 'Other',
                     amount: appProvider.formatCurrency(10000),
                     percentage: 23,
-                    color: Colors.purple,
+                    color: context.appColors.accent,
                   ),
                 ],
               ),
@@ -273,14 +290,14 @@ class _PeriodChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: isSelected ? Colors.blue : Colors.white,
+        color: isSelected ? context.cs.primary : context.cs.surfaceContainerLow,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: isSelected ? Colors.blue : Colors.grey[300]!),
+        border: Border.all(color: isSelected ? context.cs.primary : context.cs.outlineVariant),
       ),
       child: Text(
         label,
         style: TextStyle(
-          color: isSelected ? Colors.white : Colors.grey[700],
+          color: isSelected ? context.cs.onPrimary : context.cs.onSurfaceVariant,
           fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
         ),
       ),
@@ -310,11 +327,11 @@ class _SummaryCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cs.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
+            color: context.cs.shadow.withValues(alpha: 0.06),
             spreadRadius: 1,
             blurRadius: 4,
           ),
@@ -328,7 +345,7 @@ class _SummaryCard extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                style: TextStyle(fontSize: 12, color: context.cs.onSurfaceVariant),
               ),
               Icon(icon, color: color, size: 20),
             ],
@@ -343,7 +360,7 @@ class _SummaryCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               subtitle!,
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
+              style: TextStyle(fontSize: 12, color: context.cs.onSurfaceVariant),
             ),
           ],
         ],
@@ -384,7 +401,7 @@ class _ExpenseItem extends StatelessWidget {
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
               value: percentage / 100,
-              backgroundColor: Colors.grey[200],
+              backgroundColor: context.cs.outlineVariant,
               valueColor: AlwaysStoppedAnimation<Color>(color),
               minHeight: 8,
             ),
@@ -416,11 +433,11 @@ class _TransactionItem extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cs.surfaceContainerLow,
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
+            color: context.cs.shadow.withValues(alpha: 0.06),
             spreadRadius: 1,
             blurRadius: 2,
           ),
@@ -431,12 +448,12 @@ class _TransactionItem extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: isIncome ? Colors.green[50] : Colors.red[50],
+              color: isIncome ? context.appColors.successContainer : context.cs.errorContainer,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
               isIncome ? Icons.arrow_downward : Icons.arrow_upward,
-              color: isIncome ? Colors.green[700] : Colors.red[700],
+              color: isIncome ? context.appColors.success : context.cs.error,
               size: 20,
             ),
           ),
@@ -452,7 +469,7 @@ class _TransactionItem extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  style: TextStyle(fontSize: 12, color: context.cs.onSurfaceVariant),
                 ),
               ],
             ),
@@ -462,7 +479,7 @@ class _TransactionItem extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: isIncome ? Colors.green[700] : Colors.red[700],
+              color: isIncome ? context.appColors.success : context.cs.error,
             ),
           ),
         ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:home_rental_management/core/theme/app_theme.dart';
 import 'package:home_rental_management/core/localization/app_localizations.dart';
 import 'package:home_rental_management/features/finance/presentation/providers/finance_provider.dart';
 import 'package:home_rental_management/features/properties/presentation/providers/property_provider.dart';
@@ -54,13 +55,13 @@ class TenantProfileScreen extends StatelessWidget {
     final onTimeCount = payments.where((p) => p.status == 'Collected').length;
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: context.cs.surface,
       appBar: CustomAppBar(
         title: tenant.name,
         subtitle: 'Tenant Profile',
         actions: [
           PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert, color: Colors.black87),
+            icon: Icon(Icons.more_vert, color: context.cs.onSurface),
             onSelected: (value) {
               if (value == 'edit') {
                 showDialog(
@@ -79,7 +80,7 @@ class TenantProfileScreen extends StatelessWidget {
                         child: const Text('Cancel'),
                       ),
                       ElevatedButton(
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                        style: ElevatedButton.styleFrom(backgroundColor: context.cs.error),
                         onPressed: () async {
                           final propertyProv = context.read<PropertyProvider>();
                           final actProv = context.read<ActivityProvider>();
@@ -100,7 +101,7 @@ class TenantProfileScreen extends StatelessWidget {
                             context.pop(); // Go back to tenant list
                           }
                         },
-                        child: const Text('Delete', style: TextStyle(color: Colors.white)),
+                        child: Text('Delete', style: TextStyle(color: context.cs.onError)),
                       ),
                     ],
                   ),
@@ -108,19 +109,19 @@ class TenantProfileScreen extends StatelessWidget {
               }
             },
             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-              const PopupMenuItem<String>(
+              PopupMenuItem<String>(
                 value: 'edit',
                 child: ListTile(
-                  leading: Icon(Icons.edit, color: Colors.blue),
-                  title: Text('Edit Tenant'),
+                  leading: Icon(Icons.edit, color: context.cs.primary),
+                  title: const Text('Edit Tenant'),
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
-              const PopupMenuItem<String>(
+              PopupMenuItem<String>(
                 value: 'delete',
                 child: ListTile(
-                  leading: Icon(Icons.delete, color: Colors.red),
-                  title: Text('Delete Tenant', style: TextStyle(color: Colors.red)),
+                  leading: Icon(Icons.delete, color: context.cs.error),
+                  title: Text('Delete Tenant', style: TextStyle(color: context.cs.error)),
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
@@ -172,11 +173,11 @@ class TenantProfileScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.cs.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withValues(alpha: 0.1),
+                    color: context.cs.shadow.withValues(alpha: 0.06),
                     spreadRadius: 1,
                     blurRadius: 4,
                   ),
@@ -186,12 +187,12 @@ class TenantProfileScreen extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 40,
-                    backgroundColor: Colors.blue[100],
+                    backgroundColor: context.cs.primaryContainer,
                     backgroundImage: tenant.imagePath != null
                         ? FileImage(File(tenant.imagePath!))
                         : null,
                     child: tenant.imagePath == null
-                        ? Icon(Icons.person, size: 40, color: Colors.blue[700])
+                        ? Icon(Icons.person, size: 40, color: context.cs.primary)
                         : null,
                   ),
                   const SizedBox(width: 16),
@@ -208,13 +209,13 @@ class TenantProfileScreen extends StatelessWidget {
                         Text(
                           '${property?.name ?? "Unknown"} - Unit ${unit.unitNumber}',
                           style:
-                              const TextStyle(fontSize: 14, color: Colors.grey),
+                              TextStyle(fontSize: 14, color: context.cs.onSurfaceVariant),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           tenant.phone,
                           style:
-                              const TextStyle(fontSize: 14, color: Colors.grey),
+                              TextStyle(fontSize: 14, color: context.cs.onSurfaceVariant),
                         ),
                       ],
                     ),
@@ -233,11 +234,11 @@ class TenantProfileScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.cs.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withValues(alpha: 0.1),
+                    color: context.cs.shadow.withValues(alpha: 0.06),
                     spreadRadius: 1,
                     blurRadius: 4,
                   ),
@@ -277,7 +278,7 @@ class TenantProfileScreen extends StatelessWidget {
                   child: _StatCard(
                     title: localizations.totalPaid,
                     value: appProvider.formatCurrency(totalPaid),
-                    color: Colors.green,
+                    color: context.appColors.success,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -285,7 +286,7 @@ class TenantProfileScreen extends StatelessWidget {
                   child: _StatCard(
                     title: localizations.onTime,
                     value: appProvider.formatNumber(onTimeCount),
-                    color: Colors.blue,
+                    color: context.cs.primary,
                   ),
                 ),
               ],
@@ -380,7 +381,7 @@ class _InfoRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: Colors.grey)),
+          Text(label, style: TextStyle(color: context.cs.onSurfaceVariant)),
           Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
         ],
       ),
@@ -404,11 +405,11 @@ class _StatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cs.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
+            color: context.cs.shadow.withValues(alpha: 0.06),
             spreadRadius: 1,
             blurRadius: 4,
           ),
@@ -425,7 +426,7 @@ class _StatCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             title,
-            style: const TextStyle(fontSize: 12, color: Colors.grey),
+            style: TextStyle(fontSize: 12, color: context.cs.onSurfaceVariant),
           ),
         ],
       ),
@@ -450,11 +451,11 @@ class _PaymentHistoryItem extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cs.surfaceContainerLow,
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
+            color: context.cs.shadow.withValues(alpha: 0.06),
             spreadRadius: 1,
             blurRadius: 2,
           ),
@@ -473,19 +474,19 @@ class _PaymentHistoryItem extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 amount,
-                style: const TextStyle(fontSize: 14, color: Colors.grey),
+                style: TextStyle(fontSize: 14, color: context.cs.onSurfaceVariant),
               ),
             ],
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.green[50],
+              color: context.appColors.successContainer,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
               status,
-              style: TextStyle(fontSize: 12, color: Colors.green[700]),
+              style: TextStyle(fontSize: 12, color: context.appColors.success),
             ),
           ),
         ],

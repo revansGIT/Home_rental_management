@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:home_rental_management/core/theme/app_theme.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import '../providers/property_provider.dart';
@@ -88,7 +89,7 @@ class _EditPropertyDialogState extends State<EditPropertyDialog> {
                         width: double.infinity,
                         height: 160,
                         decoration: BoxDecoration(
-                          color: Colors.grey[200],
+                          color: context.cs.outlineVariant,
                           borderRadius: BorderRadius.circular(12),
                           image: _imagePath != null
                               ? DecorationImage(
@@ -98,8 +99,8 @@ class _EditPropertyDialogState extends State<EditPropertyDialog> {
                               : null,
                         ),
                         child: _imagePath == null
-                            ? const Center(
-                                child: Icon(Icons.add_photo_alternate, size: 50, color: Colors.grey),
+                            ? Center(
+                                child: Icon(Icons.add_photo_alternate, size: 50, color: context.cs.onSurfaceVariant),
                               )
                             : null,
                       ),
@@ -107,9 +108,9 @@ class _EditPropertyDialogState extends State<EditPropertyDialog> {
                         bottom: 8,
                         right: 8,
                         child: CircleAvatar(
-                          backgroundColor: Colors.blue[700],
+                          backgroundColor: context.cs.primary,
                           child: IconButton(
-                            icon: const Icon(Icons.camera_alt, color: Colors.white, size: 20),
+                            icon: Icon(Icons.camera_alt, color: context.cs.onPrimary, size: 20),
                             onPressed: _pickImage,
                           ),
                         ),
@@ -155,7 +156,7 @@ class _EditPropertyDialogState extends State<EditPropertyDialog> {
                 const SizedBox(height: 24),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue[700],
+                    backgroundColor: context.cs.primary,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
@@ -182,7 +183,7 @@ class _EditPropertyDialogState extends State<EditPropertyDialog> {
                       if (context.mounted) Navigator.of(context).pop();
                     }
                   },
-                  child: const Text('Save Changes', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                  child: Text('Save Changes', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: context.cs.onPrimary)),
                 ),
               ],
             ),

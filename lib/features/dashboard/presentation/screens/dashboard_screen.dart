@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:home_rental_management/core/theme/app_theme.dart';
 import 'package:home_rental_management/core/localization/app_localizations.dart';
 import 'package:home_rental_management/features/finance/presentation/providers/finance_provider.dart';
 import 'package:home_rental_management/core/providers/activity_provider.dart';
@@ -32,7 +33,7 @@ class DashboardScreen extends StatelessWidget {
     double pending = financeProv.totalPending;
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: context.cs.surface,
       appBar: CustomAppBar(
         subtitle: localizations.welcomeBack,
         title: localizations.propertyManagerDashboard,
@@ -51,7 +52,7 @@ class DashboardScreen extends StatelessWidget {
                     title: localizations.buildings,
                     value: appProvider.formatNumber(totalBuildings),
                     icon: Icons.business,
-                    color: Colors.blue,
+                    color: context.cs.primary,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -60,7 +61,7 @@ class DashboardScreen extends StatelessWidget {
                     title: localizations.units,
                     value: appProvider.formatNumber(totalUnits),
                     icon: Icons.apartment,
-                    color: Colors.green,
+                    color: context.appColors.success,
                   ),
                 ),
               ],
@@ -73,7 +74,7 @@ class DashboardScreen extends StatelessWidget {
                     title: localizations.totalTenants,
                     value: appProvider.formatNumber(totalTenants),
                     icon: Icons.people,
-                    color: Colors.orange,
+                    color: context.appColors.warning,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -82,7 +83,7 @@ class DashboardScreen extends StatelessWidget {
                     title: localizations.thisMonth,
                     value: appProvider.formatCurrency(collected),
                     icon: Icons.attach_money,
-                    color: Colors.purple,
+                    color: context.appColors.accent,
                   ),
                 ),
               ],
@@ -145,11 +146,11 @@ class DashboardScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.cs.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withValues(alpha: 0.1),
+                    color: context.cs.shadow.withValues(alpha: 0.06),
                     spreadRadius: 1,
                     blurRadius: 4,
                   ),
@@ -160,7 +161,7 @@ class DashboardScreen extends StatelessWidget {
                 children: [
                   Text(
                     localizations.collectedVsPending,
-                    style: const TextStyle(fontSize: 14, color: Colors.grey),
+                    style: TextStyle(fontSize: 14, color: context.cs.onSurfaceVariant),
                   ),
                   const SizedBox(height: 12),
                   Row(
@@ -171,16 +172,16 @@ class DashboardScreen extends StatelessWidget {
                         children: [
                           Text(
                             localizations.collected,
-                            style: const TextStyle(
-                                fontSize: 12, color: Colors.grey),
+                            style: TextStyle(
+                                fontSize: 12, color: context.cs.onSurfaceVariant),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             appProvider.formatCurrency(collected),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: Colors.green,
+                              color: context.appColors.success,
                             ),
                           ),
                         ],
@@ -190,16 +191,16 @@ class DashboardScreen extends StatelessWidget {
                         children: [
                           Text(
                             localizations.pending,
-                            style: const TextStyle(
-                                fontSize: 12, color: Colors.grey),
+                            style: TextStyle(
+                                fontSize: 12, color: context.cs.onSurfaceVariant),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             appProvider.formatCurrency(pending),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: Colors.orange,
+                              color: context.appColors.warning,
                             ),
                           ),
                         ],
@@ -285,11 +286,11 @@ class _StatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cs.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
+            color: context.cs.shadow.withValues(alpha: 0.06),
             spreadRadius: 1,
             blurRadius: 4,
           ),
@@ -312,7 +313,7 @@ class _StatCard extends StatelessWidget {
             fit: BoxFit.scaleDown,
             child: Text(
               title,
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
+              style: TextStyle(fontSize: 12, color: context.cs.onSurfaceVariant),
             ),
           ),
         ],
@@ -339,19 +340,19 @@ class _ActionButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.blue[50],
+          color: context.cs.primaryContainer,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
           children: [
-            Icon(icon, color: Colors.blue[700], size: 28),
+            Icon(icon, color: context.cs.primary, size: 28),
             const SizedBox(height: 4),
             Text(
               label,
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 10, color: Colors.blue[700]),
+              style: TextStyle(fontSize: 10, color: context.cs.primary),
             ),
           ],
         ),
@@ -379,11 +380,11 @@ class _ActivityItem extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cs.surfaceContainerLow,
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
+            color: context.cs.shadow.withValues(alpha: 0.06),
             spreadRadius: 1,
             blurRadius: 2,
           ),
@@ -394,10 +395,10 @@ class _ActivityItem extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.blue[50],
+              color: context.cs.primaryContainer,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, color: Colors.blue[700], size: 20),
+            child: Icon(icon, color: context.cs.primary, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -411,14 +412,14 @@ class _ActivityItem extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  style: TextStyle(fontSize: 12, color: context.cs.onSurfaceVariant),
                 ),
               ],
             ),
           ),
           Text(
             time,
-            style: const TextStyle(fontSize: 12, color: Colors.grey),
+            style: TextStyle(fontSize: 12, color: context.cs.onSurfaceVariant),
           ),
         ],
       ),

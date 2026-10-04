@@ -32,7 +32,7 @@ class SettingsScreen extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                   child: Row(
                     children: [
-                      _TileIcon(icon: Icons.palette_outlined),
+                      const _TileIcon(icon: Icons.palette_outlined),
                       const SizedBox(width: 16),
                       Text(
                         localizations.theme,

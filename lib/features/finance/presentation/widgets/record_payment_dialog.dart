@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:home_rental_management/core/theme/app_theme.dart';
 import 'package:home_rental_management/features/tenants/presentation/providers/tenant_provider.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/providers/activity_provider.dart';
@@ -123,8 +124,8 @@ class _RecordPaymentDialogState extends State<RecordPaymentDialog> {
                       height: 50,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue[700],
-                          foregroundColor: Colors.white,
+                          backgroundColor: context.cs.primary,
+                          foregroundColor: context.cs.onPrimary,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),

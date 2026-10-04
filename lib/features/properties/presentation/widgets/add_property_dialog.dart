@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:home_rental_management/core/theme/app_theme.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/providers/activity_provider.dart';
 import '../providers/property_provider.dart';
@@ -85,8 +86,8 @@ class _AddPropertyDialogState extends State<AddPropertyDialog> {
                 height: 50,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue[700],
-                    foregroundColor: Colors.white,
+                    backgroundColor: context.cs.primary,
+                    foregroundColor: context.cs.onPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
