@@ -150,6 +150,27 @@ class SettingsScreen extends StatelessWidget {
                     },
                   ),
                 ),
+                const Divider(height: 1, indent: 16, endIndent: 16),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8),
+                        child: Text(
+                          'Rent Reminder',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                      _buildCheckboxTile('7 days before', '7_days', appProvider),
+                      _buildCheckboxTile('3 days before', '3_days', appProvider),
+                      _buildCheckboxTile('1 day before', '1_day', appProvider),
+                      _buildCheckboxTile('Due date', 'due_date', appProvider),
+                      _buildCheckboxTile('Overdue', 'overdue', appProvider),
+                    ],
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -231,6 +252,22 @@ class SettingsScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildCheckboxTile(String title, String key, AppProvider appProvider) {
+    return CheckboxListTile(
+      title: Text(title, style: const TextStyle(fontSize: 14)),
+      value: appProvider.rentReminders.contains(key),
+      onChanged: (bool? value) {
+        if (value != null) {
+          appProvider.toggleRentReminder(key);
+        }
+      },
+      contentPadding: EdgeInsets.zero,
+      controlAffinity: ListTileControlAffinity.leading,
+      dense: true,
+      visualDensity: VisualDensity.compact,
     );
   }
 }

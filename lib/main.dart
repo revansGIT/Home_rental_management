@@ -17,8 +17,22 @@ import 'utils/app_provider.dart';
 import 'core/routes/app_router.dart';
 import 'core/services/notification_service.dart';
 
+import 'core/services/background_task_service.dart';
+import 'package:workmanager/workmanager.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  await Workmanager().initialize(
+    callbackDispatcher,
+  );
+  
+  await Workmanager().registerPeriodicTask(
+    "rentReminderTask",
+    "checkRentReminders",
+    frequency: const Duration(hours: 24),
+  );
+
   await Hive.initFlutter();
 
   Hive.registerAdapter(PropertyModelAdapter());

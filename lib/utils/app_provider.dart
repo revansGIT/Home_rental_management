@@ -12,6 +12,7 @@ class AppProvider extends ChangeNotifier {
   bool _useDynamicColor = false;
 
   bool _notificationsEnabled = true;
+  List<String> _rentReminders = ['3_days', '1_day', 'overdue'];
 
   AppProvider() {
     _loadSettings();
@@ -35,6 +36,11 @@ class AppProvider extends ChangeNotifier {
     _useDynamicColor = _settingsBox.get('useDynamicColor', defaultValue: false) as bool;
 
     _notificationsEnabled = _settingsBox.get('notificationsEnabled', defaultValue: true);
+    
+    final savedReminders = _settingsBox.get('rentReminders');
+    if (savedReminders != null && savedReminders is List) {
+      _rentReminders = savedReminders.cast<String>().toList();
+    }
   }
 
   Locale get locale => _locale;
@@ -72,6 +78,18 @@ class AppProvider extends ChangeNotifier {
   void setNotificationsEnabled(bool enabled) {
     _notificationsEnabled = enabled;
     _settingsBox.put('notificationsEnabled', enabled);
+    notifyListeners();
+  }
+
+  List<String> get rentReminders => _rentReminders;
+
+  void toggleRentReminder(String reminder) {
+    if (_rentReminders.contains(reminder)) {
+      _rentReminders.remove(reminder);
+    } else {
+      _rentReminders.add(reminder);
+    }
+    _settingsBox.put('rentReminders', _rentReminders);
     notifyListeners();
   }
 
