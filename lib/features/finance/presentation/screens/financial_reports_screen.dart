@@ -12,6 +12,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../core/models/payment_model.dart';
 import '../widgets/record_payment_dialog.dart';
+import '../widgets/record_expense_dialog.dart';
 
 class FinancialReportsScreen extends StatelessWidget {
   const FinancialReportsScreen({super.key});
@@ -91,6 +92,21 @@ class FinancialReportsScreen extends StatelessWidget {
         actions: [
           IconButton(
             style: IconButton.styleFrom(
+              backgroundColor: context.cs.errorContainer,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            icon: Icon(Icons.money_off, color: context.cs.error, size: 20),
+            tooltip: 'Record Expense', 
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (_) => const RecordExpenseDialog(),
+              );
+            },
+          ),
+          const SizedBox(width: 8),
+          IconButton(
+            style: IconButton.styleFrom(
               backgroundColor: context.cs.primaryContainer,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
@@ -122,36 +138,44 @@ class FinancialReportsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Summary Cards
-            Row(
-              children: [
-                Expanded(
-                  child: _SummaryCard(
-                    title: localizations.totalRevenue,
-                    value: appProvider.formatCurrency(totalCollected),
-                    color: context.appColors.success,
-                    icon: Icons.trending_up,
-                  ),
+            // Financial Overview Dashboard
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: context.cs.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: context.cs.outlineVariant.withValues(alpha: 0.5),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _SummaryCard(
-                    title: localizations.totalExpense,
-                    value: appProvider.formatCurrency(totalPending),
-                    color: context.cs.error,
-                    icon: Icons.trending_down,
+                boxShadow: [
+                  BoxShadow(
+                    color: context.cs.shadow.withValues(alpha: 0.05),
+                    spreadRadius: 2,
+                    blurRadius: 8,
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            _SummaryCard(
-              title: localizations.netProfit,
-              value: appProvider.formatCurrency(80000),
-              subtitle: '64% ${localizations.margin}',
-              color: context.cs.primary,
-              icon: Icons.account_balance_wallet,
-              isWide: true,
+                ],
+              ),
+              child: Column(
+                children: [
+                  _OverviewRow('Expected Rent', appProvider.formatCurrency(totalCollected + totalPending), context.cs.onSurface),
+                  const SizedBox(height: 8),
+                  _OverviewRow('Collected Rent', appProvider.formatCurrency(totalCollected), context.appColors.success),
+                  const SizedBox(height: 8),
+                  _OverviewRow('Pending Rent', appProvider.formatCurrency(totalPending), context.appColors.warning),
+                  const SizedBox(height: 8),
+                  _OverviewRow('Expenses', appProvider.formatCurrency(financeProv.totalExpenses), context.cs.error),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8),
+                    child: Divider(),
+                  ),
+                  _OverviewRow(
+                    'Net Income',
+                    appProvider.formatCurrency(totalCollected - financeProv.totalExpenses),
+                    context.cs.primary,
+                    isTotal: true,
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 24),
 
@@ -176,57 +200,64 @@ class FinancialReportsScreen extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  SizedBox(
-                    height: 200,
-                    child: PieChart(
-                      PieChartData(
-                        sectionsSpace: 2,
-                        centerSpaceRadius: 40,
-                        sections: [
-                          PieChartSectionData(
-                            color: context.cs.primary,
-                            value: 44,
-                            title: '44%',
-                            radius: 50,
-                            titleStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: context.cs.surface),
+                  if (financeProv.expenses.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 24),
+                      child: Center(child: Text('No expenses recorded.')),
+                    )
+                  else
+                    ...() {
+                      final total = financeProv.totalExpenses;
+                      final Map<String, double> categorySums = {};
+                      for (var e in financeProv.expenses) {
+                        categorySums[e.category] = (categorySums[e.category] ?? 0) + e.amount;
+                      }
+                      final sortedCategories = categorySums.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
+                      final colors = [context.cs.primary, context.appColors.warning, context.appColors.accent, context.cs.error, context.cs.secondary];
+                      
+                      final sections = sortedCategories.asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final sum = entry.value.value;
+                        final color = colors[index % colors.length];
+                        final pct = (sum / total * 100).round();
+                        return PieChartSectionData(
+                          color: color,
+                          value: sum,
+                          title: '$pct%',
+                          radius: 50,
+                          titleStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: context.cs.surface),
+                        );
+                      }).toList();
+
+                      final items = sortedCategories.asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final category = entry.value.key;
+                        final sum = entry.value.value;
+                        final color = colors[index % colors.length];
+                        final pct = (sum / total * 100).round();
+                        return _ExpenseItem(
+                          label: category,
+                          amount: appProvider.formatCurrency(sum),
+                          percentage: pct,
+                          color: color,
+                        );
+                      }).toList();
+
+                      return [
+                        SizedBox(
+                          height: 200,
+                          child: PieChart(
+                            PieChartData(
+                              sectionsSpace: 2,
+                              centerSpaceRadius: 40,
+                              sections: sections,
+                            ),
                           ),
-                          PieChartSectionData(
-                            color: context.appColors.warning,
-                            value: 33,
-                            title: '33%',
-                            radius: 50,
-                            titleStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: context.cs.surface),
-                          ),
-                          PieChartSectionData(
-                            color: context.appColors.accent,
-                            value: 23,
-                            title: '23%',
-                            radius: 50,
-                            titleStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: context.cs.surface),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _ExpenseItem(
-                    label: 'Maintenance',
-                    amount: appProvider.formatCurrency(20000),
-                    percentage: 44,
-                    color: context.cs.primary,
-                  ),
-                  _ExpenseItem(
-                    label: 'Utilities',
-                    amount: appProvider.formatCurrency(15000),
-                    percentage: 33,
-                    color: context.appColors.warning,
-                  ),
-                  _ExpenseItem(
-                    label: 'Other',
-                    amount: appProvider.formatCurrency(10000),
-                    percentage: 23,
-                    color: context.appColors.accent,
-                  ),
+                        ),
+                        const SizedBox(height: 16),
+                        ...items,
+                      ];
+                    }(),
                 ],
               ),
             ),
@@ -305,69 +336,7 @@ class _PeriodChip extends StatelessWidget {
   }
 }
 
-class _SummaryCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final String? subtitle;
-  final Color color;
-  final IconData icon;
-  final bool isWide;
 
-  const _SummaryCard({
-    required this.title,
-    required this.value,
-    this.subtitle,
-    required this.color,
-    required this.icon,
-    this.isWide = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: context.cs.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: context.cs.shadow.withValues(alpha: 0.06),
-            spreadRadius: 1,
-            blurRadius: 4,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                title,
-                style: TextStyle(fontSize: 12, color: context.cs.onSurfaceVariant),
-              ),
-              Icon(icon, color: color, size: 20),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-                fontSize: 20, fontWeight: FontWeight.bold, color: color),
-          ),
-          if (subtitle != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              subtitle!,
-              style: TextStyle(fontSize: 12, color: context.cs.onSurfaceVariant),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
 
 class _ExpenseItem extends StatelessWidget {
   final String label;
@@ -484,6 +453,40 @@ class _TransactionItem extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _OverviewRow extends StatelessWidget {
+  final String label;
+  final String amount;
+  final Color color;
+  final bool isTotal;
+
+  const _OverviewRow(this.label, this.amount, this.color, {this.isTotal = false});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: isTotal ? 16 : 14,
+            fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
+            color: context.cs.onSurfaceVariant,
+          ),
+        ),
+        Text(
+          amount,
+          style: TextStyle(
+            fontSize: isTotal ? 18 : 16,
+            fontWeight: isTotal ? FontWeight.bold : FontWeight.w600,
+            color: color,
+          ),
+        ),
+      ],
     );
   }
 }
