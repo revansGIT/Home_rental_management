@@ -1,4 +1,3 @@
-import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -106,14 +105,12 @@ class AppTheme {
 
   static const Color seed = Color(0xFF3D5AFE);
 
-  static ThemeData light([ColorScheme? dynamicScheme]) => _build(
-        (dynamicScheme ?? ColorScheme.fromSeed(seedColor: seed)).harmonized(),
+  static ThemeData light() => _build(
+        ColorScheme.fromSeed(seedColor: seed),
       );
 
-  static ThemeData dark([ColorScheme? dynamicScheme]) => _build(
-        (dynamicScheme ??
-                ColorScheme.fromSeed(seedColor: seed, brightness: Brightness.dark))
-            .harmonized(),
+  static ThemeData dark() => _build(
+        ColorScheme.fromSeed(seedColor: seed, brightness: Brightness.dark),
       );
 
   static ThemeData _build(ColorScheme cs) {

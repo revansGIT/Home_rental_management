@@ -69,15 +69,6 @@ class SettingsScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                _SettingsTile(
-                  icon: Icons.wallpaper_outlined,
-                  title: localizations.dynamicColor,
-                  subtitle: localizations.dynamicColorDesc,
-                  trailing: Switch(
-                    value: appProvider.useDynamicColor,
-                    onChanged: appProvider.setUseDynamicColor,
-                  ),
-                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -301,21 +292,24 @@ class _SettingsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: _TileIcon(icon: icon),
-      title: Text(
-        title,
-        style: const TextStyle(fontWeight: FontWeight.w600),
+    return Material(
+      color: Colors.transparent,
+      child: ListTile(
+        leading: _TileIcon(icon: icon),
+        title: Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+        subtitle: subtitle != null
+            ? Text(
+                subtitle!,
+                style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              )
+            : null,
+        trailing:
+            trailing ?? (onTap != null ? Icon(Icons.chevron_right, color: Theme.of(context).colorScheme.onSurfaceVariant) : null),
+        onTap: onTap,
       ),
-      subtitle: subtitle != null
-          ? Text(
-              subtitle!,
-              style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
-            )
-          : null,
-      trailing:
-          trailing ?? (onTap != null ? Icon(Icons.chevron_right, color: Theme.of(context).colorScheme.onSurfaceVariant) : null),
-      onTap: onTap,
     );
   }
 }
