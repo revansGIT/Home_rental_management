@@ -35,7 +35,7 @@ class _AddTenantDialogState extends State<AddTenantDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final propertiesProv = context.watch<PropertyProvider>();
+    final propertiesProv = context.read<PropertyProvider>();
     final availableUnits =
         propertiesProv.units.where((u) => !u.isOccupied).toList();
 
@@ -121,6 +121,7 @@ class _AddTenantDialogState extends State<AddTenantDialog> {
                               borderRadius: BorderRadius.circular(12)),
                           prefixIcon: const Icon(Icons.meeting_room),
                         ),
+                        isExpanded: true,
                         items: availableUnits.map((u) {
                           final prop = propertiesProv.getProperty(u.propertyId);
                           return DropdownMenuItem(

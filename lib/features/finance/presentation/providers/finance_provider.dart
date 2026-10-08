@@ -20,6 +20,10 @@ class FinanceProvider extends ChangeNotifier {
     return _invoiceBox.values.where((i) => i.tenantId == tenantId).toList();
   }
 
+  RentInvoiceModel? getInvoice(String id) {
+    return _invoiceBox.get(id);
+  }
+
   double get totalCollected {
     return _paymentBox.values
         .where((p) => p.status == 'Collected')

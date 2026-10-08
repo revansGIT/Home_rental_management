@@ -15,6 +15,7 @@ import 'package:home_rental_management/features/tenants/presentation/widgets/edi
 import 'package:home_rental_management/features/finance/presentation/widgets/record_payment_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:home_rental_management/core/services/notification_service.dart';
+import 'package:home_rental_management/core/services/pdf_receipt_service.dart';
 import 'dart:io';
 
 class TenantProfileScreen extends StatelessWidget {
@@ -111,18 +112,22 @@ class TenantProfileScreen extends StatelessWidget {
             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
               PopupMenuItem<String>(
                 value: 'edit',
-                child: ListTile(
-                  leading: Icon(Icons.edit, color: context.cs.primary),
-                  title: const Text('Edit Tenant'),
-                  contentPadding: EdgeInsets.zero,
+                child: Row(
+                  children: [
+                    Icon(Icons.edit, color: context.cs.primary),
+                    const SizedBox(width: 12),
+                    const Text('Edit Tenant'),
+                  ],
                 ),
               ),
               PopupMenuItem<String>(
                 value: 'delete',
-                child: ListTile(
-                  leading: Icon(Icons.delete, color: context.cs.error),
-                  title: Text('Delete Tenant', style: TextStyle(color: context.cs.error)),
-                  contentPadding: EdgeInsets.zero,
+                child: Row(
+                  children: [
+                    Icon(Icons.delete, color: context.cs.error),
+                    const SizedBox(width: 12),
+                    Text('Delete Tenant', style: TextStyle(color: context.cs.error)),
+                  ],
                 ),
               ),
             ],
@@ -314,6 +319,24 @@ class TenantProfileScreen extends StatelessWidget {
                         date: DateFormat('MMM d, yyyy').format(payment.date),
                         amount: appProvider.formatCurrency(payment.amount),
                         status: payment.status,
+                        onReceiptTap: () async {
+                          if (payment.invoiceId != null) {
+                            final invoice = financeProv.getInvoice(payment.invoiceId!);
+                            if (invoice != null) {
+                              await PdfReceiptService.generateAndShareReceipt(
+                                payment: payment,
+                                invoice: invoice,
+                                tenant: tenant,
+                                property: property!,
+                                unit: unit,
+                              );
+                            }
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Cannot generate receipt for legacy payments')),
+                            );
+                          }
+                        },
                       );
                     },
                   ),
@@ -438,11 +461,13 @@ class _PaymentHistoryItem extends StatelessWidget {
   final String date;
   final String amount;
   final String status;
+  final VoidCallback? onReceiptTap;
 
   const _PaymentHistoryItem({
     required this.date,
     required this.amount,
     required this.status,
+    this.onReceiptTap,
   });
 
   @override
@@ -478,16 +503,31 @@ class _PaymentHistoryItem extends StatelessWidget {
               ),
             ],
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: context.appColors.successContainer,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              status,
-              style: TextStyle(fontSize: 12, color: context.appColors.success),
-            ),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: context.appColors.successContainer,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  status,
+                  style: TextStyle(fontSize: 12, color: context.appColors.success),
+                ),
+              ),
+              if (onReceiptTap != null) ...[
+                const SizedBox(width: 8),
+                IconButton(
+                  icon: const Icon(Icons.receipt_long, size: 20),
+                  color: context.cs.primary,
+                  onPressed: onReceiptTap,
+                  tooltip: 'Generate Receipt',
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ],
+            ],
           ),
         ],
       ),

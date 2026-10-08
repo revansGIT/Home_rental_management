@@ -32,7 +32,6 @@ void callbackDispatcher() {
         rentReminders = savedReminders.cast<String>().toList();
       }
 
-      final paymentBox = await Hive.openBox<PaymentModel>('payments');
       final tenantBox = await Hive.openBox<TenantModel>('tenants');
       final unitBox = await Hive.openBox<UnitModel>('units');
       final invoiceBox = await Hive.openBox<RentInvoiceModel>('rent_invoices');
