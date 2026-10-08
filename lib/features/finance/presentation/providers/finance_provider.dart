@@ -3,14 +3,17 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../core/models/payment_model.dart';
 import '../../../../core/models/rent_invoice_model.dart';
+import '../../../../core/models/expense_model.dart';
 
 class FinanceProvider extends ChangeNotifier {
   final Box<PaymentModel> _paymentBox = Hive.box<PaymentModel>('payments');
   final Box<RentInvoiceModel> _invoiceBox = Hive.box<RentInvoiceModel>('rent_invoices');
+  final Box<ExpenseModel> _expenseBox = Hive.box<ExpenseModel>('expenses');
   final _uuid = const Uuid();
 
   List<PaymentModel> get payments => _paymentBox.values.toList();
   List<RentInvoiceModel> get invoices => _invoiceBox.values.toList();
+  List<ExpenseModel> get expenses => _expenseBox.values.toList();
 
   List<PaymentModel> getPaymentsForTenant(String tenantId) {
     return _paymentBox.values.where((p) => p.tenantId == tenantId).toList();
@@ -34,6 +37,34 @@ class FinanceProvider extends ChangeNotifier {
     return _invoiceBox.values
         .where((i) => i.status != 'Paid')
         .fold(0.0, (sum, i) => sum + i.remainingBalance);
+  }
+
+  double get totalExpenses {
+    return _expenseBox.values.fold(0.0, (sum, e) => sum + e.amount);
+  }
+
+  Future<void> addExpense({
+    String? propertyId,
+    required double amount,
+    required String category,
+    required DateTime date,
+    required String description,
+  }) async {
+    final expense = ExpenseModel(
+      id: _uuid.v4(),
+      propertyId: propertyId,
+      amount: amount,
+      category: category,
+      date: date,
+      description: description,
+    );
+    await _expenseBox.put(expense.id, expense);
+    notifyListeners();
+  }
+
+  Future<void> deleteExpense(String id) async {
+    await _expenseBox.delete(id);
+    notifyListeners();
   }
 
   Future<void> addPayment(
