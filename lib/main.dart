@@ -10,6 +10,7 @@ import 'core/models/unit_model.dart';
 import 'core/models/tenant_model.dart';
 import 'core/models/payment_model.dart';
 import 'core/models/activity_model.dart';
+import 'core/models/rent_invoice_model.dart';
 import 'features/properties/presentation/providers/property_provider.dart';
 import 'features/tenants/presentation/providers/tenant_provider.dart';
 import 'features/finance/presentation/providers/finance_provider.dart';
@@ -40,6 +41,7 @@ void main() async {
   Hive.registerAdapter(TenantModelAdapter());
   Hive.registerAdapter(PaymentModelAdapter());
   Hive.registerAdapter(ActivityModelAdapter());
+  Hive.registerAdapter(RentInvoiceModelAdapter());
 
   await Hive.openBox('settings');
   await Hive.openBox<PropertyModel>('properties');
@@ -47,6 +49,7 @@ void main() async {
   await Hive.openBox<TenantModel>('tenants');
   await Hive.openBox<PaymentModel>('payments');
   await Hive.openBox<ActivityModel>('activities');
+  await Hive.openBox<RentInvoiceModel>('rent_invoices');
 
   await NotificationService().init();
 

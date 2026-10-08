@@ -23,13 +23,14 @@ class PaymentModelAdapter extends TypeAdapter<PaymentModel> {
       date: fields[3] as DateTime,
       status: fields[4] as String,
       description: fields[5] as String,
+      invoiceId: fields[6] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, PaymentModel obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(7)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -41,7 +42,9 @@ class PaymentModelAdapter extends TypeAdapter<PaymentModel> {
       ..writeByte(4)
       ..write(obj.status)
       ..writeByte(5)
-      ..write(obj.description);
+      ..write(obj.description)
+      ..writeByte(6)
+      ..write(obj.invoiceId);
   }
 
   @override

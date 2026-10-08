@@ -22,6 +22,9 @@ class PaymentModel {
   @HiveField(5)
   final String description;
 
+  @HiveField(6)
+  final String? invoiceId;
+
   PaymentModel({
     required this.id,
     required this.tenantId,
@@ -29,5 +32,6 @@ class PaymentModel {
     required this.date,
     required this.status,
     required this.description,
+    this.invoiceId,
   });
 }
